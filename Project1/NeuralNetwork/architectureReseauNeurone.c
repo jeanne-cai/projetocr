@@ -5,19 +5,34 @@
 typedef struct Neuron Neuron;
 struct Neuron{
 	float biais;
+	float valeur;
+	int nbWeight;
+	int tabWeight[nbWeight];
 };
+
 
 //structure couche
 typedef struct Layer Layer;
 struct Layer{
+	
+	Neuron* tabNeuron; // tableau où je vais stocker mes neurones
 	int nb_neuron;
-	struct Neuron n[100];
+	
 };
 //permet de créer une nouvelle couche
 Layer new_layer(int nbNeuron)
 {
-	/* faire alloc dyn du tableau de neurone */
+	
 	Layer newLayer;
+
+	newLayer.nb_neuron=nbNeuron;
+
+	//ALLOCATION DYNAMIQUE
+	newLayer.tabNeuron=NULL;
+	newLayer.tabNeuron = malloc (nbNeuron * sizeof(Neuron));//alloc
+	if(tabNeuron==NULL) //Vérification
+		exit(-1);
+	
 	return newLayer;
 }
 //permet de créer un nouveau neurone
@@ -49,7 +64,7 @@ int creation_neural_network(int nbLayer, int nbNeuronByLayer[]){
 	return 0;
 	
 }
-
+/*
 int main()
 {
 	int nbLayer;
@@ -62,4 +77,4 @@ int main()
 		scanf("%d",(nbNeuronByLayer+i));
 	}
 	creation_neural_network(nbLayer,nbNeuronByLayer);
-}
+}*/
