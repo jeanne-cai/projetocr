@@ -4,9 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
-void random_Matrice(int length, int width, float **tab);
-//void produit_Matrice(int lineM1,int colM1,int lineM2,int colM2,int mat1[][colM1],int mat2[][colM2],int matResult[][colM2]);
+void init_matrice(int length,float **tab);
+void random_matrice(int length, int width, float **tab);
+void produit_matrice(int line1,int col1,float **mat1,float *mat2,float *matResult);
+void somme_arrays(int taille, float *mat1, float *mat2, float *mat3);
+void affiche_array(int length, float *arr);
 //void affiche_Matrice(int length, int width, int mat[][width]);
 
 #endif
+

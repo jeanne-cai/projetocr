@@ -15,5 +15,7 @@ struct network{
 
 int init_network(Network *network,int nbLayer, int nbNeuronPerLayer[]);
 void free_network(Network *network);
+float sigmoid(float z);
+void feed_forward(Network *network, float *inputs);
 
 #endif

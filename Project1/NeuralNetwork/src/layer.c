@@ -3,14 +3,20 @@
 #include "matrice.h"
 #include "layer.h"
 
-
 Layer new_layer(int nbNeuron, Layer *previousLayer){
 	Layer layer;
 	layer.nbNeuron=nbNeuron;
 	layer.previousLayer = previousLayer;
 
+
+	
+
+	//ALLOCATION DYNAMIQUE
+	layer.valuesNeurons = malloc (nbNeuron * sizeof(float));
+
 	//ALLOCATION DYNAMIQUE
 	layer.valuesBiais = malloc (nbNeuron * sizeof(float));
+	init_biais(nbNeuron,layer.valuesBiais);
 
 	if(previousLayer!=NULL){ //si c'est pas le layer input
 		//ALLOCATION DYNAMIQUE
@@ -21,10 +27,7 @@ Layer new_layer(int nbNeuron, Layer *previousLayer){
 		init_weights(nbNeuron,previousLayer->nbNeuron,layer.weights);
 	}
 
-	init_biais(nbNeuron,layer.valuesBiais);
-
-	//ALLOCATION DYNAMIQUE
-	layer.valuesNeurons = malloc (nbNeuron * sizeof(float));
+	
 
 	//produit_Matrice(nbNeuron,previousLayer->nbNeuron,previousLayer->nbNeuron,1,weights,previousLayer->valuesNeuron,int matResult[][colM2]);
 	return layer;
@@ -32,7 +35,7 @@ Layer new_layer(int nbNeuron, Layer *previousLayer){
 
 void init_weights(int l, int c,float **weights)
 {
-	random_Matrice(l,c,weights);
+	random_matrice(l,c,weights);
 }
 
 void init_biais(int l, float *valuesBiais )

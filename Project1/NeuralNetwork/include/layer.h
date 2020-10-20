@@ -1,8 +1,5 @@
 #ifndef LAYER_H
 #define LAYER_H
-#include "matrice.h"
-#include <stdio.h>
-#include <stdlib.h>
 typedef struct layer Layer;
 struct layer{
 	int nbNeuron;

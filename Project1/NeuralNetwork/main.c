@@ -27,16 +27,45 @@ void print_network(Network network){
 	}
 }
 	
+void print_valuesNeurons(Network network)
+{
 
+	for(int i=0; i<network.nbLayer;i++){
+		printf("\nLes valeurs des neurones de la couche n°%d :",i);
+		for(int j=0; j<network.tabLayer[i].nbNeuron;j++){
+			printf("%f ",network.tabLayer[i].valuesNeurons[j]);
+		}
+	}
+	printf("\n");
+
+}
 int main()
 {
 	srand(time(NULL));
 	int nbCouches=3;
 	int tab[3] = {2,2,1};
+	float inputs[] = {1.f,0.f};
+
 	Network network;
 	init_network(&network, nbCouches, tab );
+	
+	network.tabLayer[1].weights[0][0] = 20;
+	network.tabLayer[1].weights[0][1] = 20;
+	network.tabLayer[1].valuesBiais[0] = -10;
+
+	network.tabLayer[1].weights[1][0] = -20;
+	network.tabLayer[1].weights[1][1] = -20;
+	network.tabLayer[1].valuesBiais[1] = 30;
+
+	network.tabLayer[2].weights[0][0] = 20;
+	network.tabLayer[2].weights[0][1] = 20;
+	network.tabLayer[2].valuesBiais[0] = -30;
 
 	print_network(network);
+
+	feed_forward(&network,inputs);
+
+	print_valuesNeurons(network);
 
 	return 0;
 }
