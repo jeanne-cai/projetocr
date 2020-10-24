@@ -100,6 +100,22 @@ void HdrawLine(SDL_Surface *image_surface, int height)
 }
 
 
+//############################ Snap ############################
+
+void Snap(SDL_Surface *image_surface,int x,int y, int x1, int y1, const char* filename)
+{
+	int w = x1 - x;
+	int h = y1 - y;
+	SDL_Surface* letter_surface = SDL_CreateRGBSurface(SDL_HWSURFACE, w, h, 32, 0, 0, 0, 0);
+	SDL_Rect position;
+	position.x = x;
+	position.y = y;
+	position.w = w;
+	position.h = h;
+	SDL_BlitSurface(image_surface,&position,letter_surface,NULL);
+	SDL_SaveBMP(letter_surface, filename);
+}
+
 
 //############################ Vertical traitement ############################
 
@@ -128,14 +144,25 @@ void VdrawLine(SDL_Surface *image_surface, int xpos, int h1, int h2)
     }
 }
 
+int nb_image = 0;
 
 void VContour(SDL_Surface *image_surface, int h1, int h2)
 {
     int width = image_surface->w;
+    int count[2] = {0, 0};
     Uint8 r, g, b;
     
 	for (int k = 0; k < width; k++)
     {	
+    	if (count[1])
+    	{
+    		nb_image++;
+    		char s[20];
+			sprintf(s, "image/%d", nb_image);
+    		Snap(image_surface, count[0]+1, h1+1, count[1], h2, strcat(s,".png"));
+    		count[1] = 0;
+    	}
+    	
         for (int l = h1; l < h2; l++)
         {
             Uint32 pixel = get_pixel(image_surface, k, l);
@@ -145,10 +172,12 @@ void VContour(SDL_Surface *image_surface, int h1, int h2)
                 if(VlineIsEmpty(image_surface, k-1, h1, h2))
                 {
 					VdrawLine(image_surface, k-1, h1, h2);
+					count[0] = k-1;
                 }
                 if(VlineIsEmpty(image_surface, k+1, h1, h2))
                 {
                     VdrawLine(image_surface, k+1, h1, h2);
+                    count[1] = k+1;
                 }
             }
         }
@@ -234,6 +263,7 @@ void GrayScale(SDL_Surface *image_surface)
         }
     }
 }
+
 
 //########################################################
 
