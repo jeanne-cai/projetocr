@@ -1,11 +1,13 @@
-#ifndef PIXEL_OPERATIONS_H_
-#define PIXEL_OPERATIONS_H_
+#ifndef SDL_BASE_H_
+#define SDL_BASE_H_
 
 #include <stdlib.h>
 #include <SDL.h>
 
+void init_sdl();
+void SDL_FreeSurface(SDL_Surface *surface);
+SDL_Surface* load_image(char *path);
 Uint32 get_pixel(SDL_Surface *surface, unsigned x, unsigned y);
 void put_pixel(SDL_Surface *surface, unsigned x, unsigned y, Uint32 pixel);
-void update_surface(SDL_Surface* screen, SDL_Surface* image);
 
 #endif

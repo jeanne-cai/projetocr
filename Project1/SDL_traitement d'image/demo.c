@@ -1,4 +1,51 @@
+#include <err.h>
+#include "SDL/SDL.h"
+
 #include "sdl_base.h"
+
+//############################ Base ############################
+
+void update_surface(SDL_Surface* screen, SDL_Surface* image)
+{
+    if (SDL_BlitSurface(image, NULL, screen, NULL) < 0)
+        warnx("BlitSurface error: %s\n", SDL_GetError());
+
+    SDL_UpdateRect(screen, 0, 0, image->w, image->h);
+}
+
+SDL_Surface* display_image(SDL_Surface *img)
+{
+    SDL_Surface *screen;
+
+    screen = SDL_SetVideoMode(img->w, img->h, 0, SDL_SWSURFACE|SDL_ANYFORMAT);
+    if (screen == NULL)
+    {
+        errx(1, "Couldn't set %dx%d video mode: %s\n",
+                img->w, img->h, SDL_GetError());
+    }
+
+    if(SDL_BlitSurface(img, NULL, screen, NULL) < 0)
+        warnx("BlitSurface error: %s\n", SDL_GetError());
+
+    SDL_UpdateRect(screen, 0, 0, img->w, img->h);
+
+    return screen;
+}
+
+void wait_for_keypressed()
+{
+    SDL_Event event;
+
+    do
+    {
+        SDL_PollEvent(&event);
+    } while(event.type != SDL_KEYDOWN);
+
+    do
+    {
+        SDL_PollEvent(&event);
+    } while(event.type != SDL_KEYUP);
+}
 
 //############################ Horizontal traitement ############################
 
@@ -16,6 +63,17 @@ int HlineIsEmpty(SDL_Surface *image_surface, int height)
         }
     }
     return 1;
+}
+
+void HdrawLine(SDL_Surface *image_surface, int height)
+{
+    int width = image_surface->w;
+    Uint32 pixel;
+    for (int i = 0; i < width; i++)
+    {
+        pixel = SDL_MapRGB(image_surface->format, 255, 0, 0);
+        put_pixel(image_surface, i, height, pixel);
+    }
 }
 
 
@@ -53,6 +111,15 @@ int VlineIsEmpty(SDL_Surface *image_surface, int xpos, int h1, int h2)
     return 1;
 }
 
+void VdrawLine(SDL_Surface *image_surface, int xpos, int h1, int h2)
+{
+    Uint32 pixel;
+    for (int i = h1; i < h2; i++)
+    {
+        pixel = SDL_MapRGB(image_surface->format, 255, 0, 0);
+        put_pixel(image_surface, xpos, i, pixel);
+    }
+}
 
 int nb_image = 0;
 
@@ -81,10 +148,12 @@ void VContour(SDL_Surface *image_surface, int h1, int h2)
             {
                 if(VlineIsEmpty(image_surface, k-1, h1, h2))
                 {
+					VdrawLine(image_surface, k-1, h1, h2);
 					count[0] = k-1;
                 }
                 if(VlineIsEmpty(image_surface, k+1, h1, h2))
                 {
+                    VdrawLine(image_surface, k+1, h1, h2);
                     count[1] = k+1;
                 }
             }
@@ -138,10 +207,12 @@ void Contour(SDL_Surface *image_surface)
             {
                 if(HlineIsEmpty(image_surface, k-1))
                 {
+					HdrawLine(image_surface, k-1);
 					count[0] = k-1;
                 }
                 if(HlineIsEmpty(image_surface, k+1))
                 {
+                    HdrawLine(image_surface, k+1);
                     count[1] = k+1;
                 }
             }
@@ -179,16 +250,29 @@ int main()
 {
 	//INIT
     SDL_Surface* image_surface;
+    SDL_Surface* screen_surface;
     image_surface = load_image("image/0image.jpg");
+    screen_surface = display_image(image_surface);
     
     init_sdl();
+
+	//MAIN
+    wait_for_keypressed(); //wait
     
     GrayScale(image_surface);
     
+    update_surface(screen_surface, image_surface);
+    
+    wait_for_keypressed(); //wait
+    
     Contour(image_surface);
+    update_surface(screen_surface, image_surface);
+    
+    wait_for_keypressed(); //wait
     
     //END
     SDL_FreeSurface(image_surface);
+    SDL_FreeSurface(screen_surface);
 
     return 0;
 }

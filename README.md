@@ -18,9 +18,26 @@ Write "./ocr" to run the exectable.
 ```
 # traitement image /segmentation
 ## Architecture
-The makefile of the neural segmentation/grayscale can be found in projetocr/Project1/SDL_traitement d'image. Write "make main" to compile the segmentation/grayscale code.
+The makefile of the neural segmentation/grayscale can be found in projetocr/Project1/SDL_traitement d'image. Write "make" to compile the segmentation/grayscale code.
 
 ```bash
 make
 ```
 
+Next, write "./main" to run the exectable.
+
+```bash
+./main
+```
+## Demo
+To have the visual demo, write "make demo"
+
+```bash
+make demo
+```
+
+Next, write "./main" to run the exectable.
+
+```bash
+./demo
+```
