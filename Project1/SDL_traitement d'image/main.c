@@ -274,7 +274,7 @@ int main()
 	//INIT
     SDL_Surface* image_surface;
     SDL_Surface* screen_surface;
-    image_surface = load_image("my_image.jpg");
+    image_surface = load_image("image/_my_image.jpg");
     screen_surface = display_image(image_surface);
     
     init_sdl();
