@@ -24,20 +24,3 @@ The makefile of the neural segmentation/grayscale can be found in projetocr/Proj
 make
 ```
 
-<<<<<<< HEAD
-=======
-# traitement image /segmentation
-## Architecture
-The makefile of the neural segmentation/grayscale can be found in projetocr/Project1/SDL_traitement d'image. Write "make main" to compile the segmentation/grayscale code.
-
-```bash
-make main
-```
->>>>>>> c0677010c76f41b4a2b521670c0c526cb0500eb8
-The .c files of the neural network can be found in the directory Projet1/NeuralNetwork/src and the headers can be found in the directory Projet1/NeuralNetwork/include.
-
-Write "./main" to run the exectable.
-
-```bash
-./main
-```
