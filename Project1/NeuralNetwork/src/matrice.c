@@ -4,7 +4,7 @@
 #include "matrice.h"
 #include <math.h>
 
-void init_matrice(int length,float **tab)
+void init_array(int length,float **tab)
 {	
 	//ALLOCATION DYNAMIQUE
 	*tab = calloc (length ,sizeof(float));
@@ -22,9 +22,24 @@ void produit_matrice(int line1,int col1,float **mat1,float *mat2,float *matResul
 {
 	for(int i=0;i<line1;i++){
 		for(int k=0;k<col1;k++){
-			printf("%f %f \n",mat1[i][k],mat2[k]);
 			matResult[i]+=mat1[i][k]*mat2[k];
-			printf("%f \n", matResult[i]);
+		}
+	}
+}
+void product_matrix_transposed(int sizeL,int sizeC,float **mat,float *col,float *matResult)
+{
+	for(int i=0;i<sizeC;i++){
+		matResult[i]=0;
+		for(int k=0;k<sizeL;k++){
+			matResult[i]+=mat[k][i]*col[k];
+		}
+	}
+}
+void product_col_line(int sizeC, int sizeL, float *col, float *line,float **matResult)
+{
+	for(int i=0;i<sizeC;i++){
+		for(int k=0;k<sizeL;k++){
+			matResult[i][k]+=col[i]*line[k];
 		}
 	}
 
@@ -37,7 +52,14 @@ void somme_arrays(int taille, float *arr1, float *arr2, float *arr3)
 	}
 
 }
+void diff_arrays(int taille, float *arr1, float *arr2, float *arr3)
+{
+	for(int i=0; i<taille;i++){
+		arr3[i]=arr1[i]-arr2[i];
+		
+	}
 
+}
 void affiche_Matrice(int length, int width, float **mat)
 {
 	for(int i=0; i<length; i++)

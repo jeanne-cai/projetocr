@@ -4,14 +4,19 @@ typedef struct layer Layer;
 struct layer{
 	int nbNeuron;
 	Layer *previousLayer;
-	float **weights;
-	float *valuesNeurons;
-	float *valuesBiais;
 
+	float *valuesNeurons;
+	float **weights;
+	float *valuesBiases;
+	
+	float *z;
+	float **deltaWeights;
+	float *deltaBiases;
+	float *cost;
 };
 
 Layer new_layer(int nbNeuron, Layer *previousLayer);
 void init_weights(int l, int c, float **weights);
-void init_biais(int l, float *valuesBiais);
+void init_biais(int l, float *valuesBiases);
 
 #endif 

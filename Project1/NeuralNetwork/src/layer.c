@@ -8,28 +8,34 @@ Layer new_layer(int nbNeuron, Layer *previousLayer){
 	layer.nbNeuron=nbNeuron;
 	layer.previousLayer = previousLayer;
 
-
-	
-
-	//ALLOCATION DYNAMIQUE
+	//dynamic allocation
 	layer.valuesNeurons = malloc (nbNeuron * sizeof(float));
 
-	//ALLOCATION DYNAMIQUE
-	layer.valuesBiais = malloc (nbNeuron * sizeof(float));
-	init_biais(nbNeuron,layer.valuesBiais);
-
-	if(previousLayer!=NULL){ //si c'est pas le layer input
-		//ALLOCATION DYNAMIQUE
-		layer.weights = malloc (nbNeuron * sizeof(float*)); //1ere dimension
+	if(previousLayer!=NULL){ //if it is not the input layer
+		
+		layer.valuesBiases = malloc (nbNeuron * sizeof(float));
+		init_biais(nbNeuron,layer.valuesBiases);
+		
+		//dynamic allocation
+		layer.weights = malloc (nbNeuron * sizeof(float*)); //1st dimension
 		for(int i =0; i<nbNeuron;i++)
-			layer.weights[i] = malloc (previousLayer->nbNeuron * sizeof(float)); //2eme dimension
-
+			//2nd dimension
+			layer.weights[i] = malloc (previousLayer->nbNeuron*sizeof(float));
 		init_weights(nbNeuron,previousLayer->nbNeuron,layer.weights);
+		
+
+		//For backpropagation
+		layer.z = calloc (nbNeuron, sizeof(float));
+		layer.deltaBiases = calloc (nbNeuron, sizeof(float));
+		//1st dimension
+		layer.deltaWeights = malloc (nbNeuron * sizeof(float*));
+		for(int i =0; i<nbNeuron;i++){
+			layer.deltaWeights[i] = 
+			calloc (previousLayer->nbNeuron, sizeof(float));//2nd dimension
+		}
+		layer.cost = calloc (nbNeuron, sizeof(float));
 	}
 
-	
-
-	//produit_Matrice(nbNeuron,previousLayer->nbNeuron,previousLayer->nbNeuron,1,weights,previousLayer->valuesNeuron,int matResult[][colM2]);
 	return layer;
 }
 
@@ -38,10 +44,10 @@ void init_weights(int l, int c,float **weights)
 	random_matrice(l,c,weights);
 }
 
-void init_biais(int l, float *valuesBiais )
+void init_biais(int l, float *valuesBiases )
 {
 
 	int min = -1, max=1;
 	for(int i =0; i<l; i++)
-		valuesBiais[i]= min + (max-min)*(rand()/(float)(RAND_MAX)); 
+		valuesBiases[i]= min + (max-min)*(rand()/(float)(RAND_MAX));
 }
