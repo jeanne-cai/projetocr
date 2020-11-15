@@ -7,7 +7,8 @@ CFLAGS= -Wall -Wextra -Werror -std=c99 -O3
 LDFLAGS=
 LDLIBS= `pkg-config --libs sdl gtk+-3.0` -lSDL_image
 
-OBJ = main.o
+SRC = main.c GTK/gtk.c segmentation/segmentation.c segmentation/sdl_base.c segmentation/pixel_operations.c
+OBJ = ${SRC:.c=.o}
 DEP = ${OBJ:.o=.d}
 
 all: main
@@ -15,7 +16,10 @@ all: main
 main: ${OBJ}
 
 clean:
-	${RM} ${OBJ} ${DEP} main
+	${RM} main
+	${RM} ${OBJ}
+	${RM} ${DEP}
+	${RM} image/seg_*.bmp
 
 -include ${DEP}
 
