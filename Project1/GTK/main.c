@@ -1,8 +1,10 @@
 #include <stdio.h>
-#include "GTK/gtk.h"
+#include "GUI/gtk.h"
 
 int main(int argc, char **argv)
 {
-    gtk_init_window(argc, argv);
+    if (!gtk_init_window(argc, argv))
+        return 0;
+
     return 1;
 }

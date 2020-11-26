@@ -1,8 +1,4 @@
-#include <err.h>
-#include "SDL/SDL.h"
-#include "SDL/SDL_image.h"
-#include "pixel_operations.h"
-
+#include "segmentation.h"
 
 //---- Main Grayscale
 
@@ -23,11 +19,6 @@ void GrayScale(SDL_Surface *image_surface)
             SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
             Uint8 average = 0.3*r + 0.59*g + 0.11*b;
-            if (average < 127)
-                average = 0;
-            else
-                average = 255;
-
             pixel = SDL_MapRGB(image_surface->format,
                         average, average, average);
 
