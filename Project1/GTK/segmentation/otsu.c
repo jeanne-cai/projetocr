@@ -20,21 +20,29 @@ void normalized(float *hist, size_t nbPixel)
         hist[i] = hist[i] / nbPixel;
 }
 
-Uint8 findThreshold(float *hist)
+Uint8 otsu_threshold(float *hist)
 {
-    float wk = 0, uk = 0, uT = 0;
-    float vk = 0, v_max = 0, threshold = 0;
+    float w0 = 0, w1 = 0, wT = 0;
+    float u0 = 0, u1 = 0, uT = 0;
+    float sum = 0, vk = 0, v_max = 0;
+    float threshold = 0;
 
     for (size_t i = 0; i < 256; i++)
-        uT += i * hist[i];
-
-    for(size_t i = 0; i < 256; i++)
     {
-        wk += hist[i];
-        uk += i * hist[i];
+        uT += i * hist[i];
+        wT += hist[i];
+    }
 
-        // Variance inter
-        vk = ((uT * wk - uk) * (uT * wk - uk)) / (wk * (1 - wk));
+    for (size_t i = 0; i < 256; i++)
+    {
+        w0 += hist[i];
+        w1 = wT - w0;
+
+        sum += i * hist[i];
+        u0 = sum / w0;
+        u1 = (uT - sum) / w1;
+
+        vk = w0 * w1 * (u0 - u1) * (u0 - u1);
 
         if (vk > v_max)
         {
@@ -55,7 +63,7 @@ void Otsu(SDL_Surface *image_surface)
     init_hist(image_surface, width, height, hist);
     normalized(hist, width * height);
 
-    Uint8 threshold = findThreshold(hist);
+    Uint8 threshold = otsu_threshold(hist);
     Uint8 r, g, b;
 
     for(size_t i = 0; i < width; i++)
