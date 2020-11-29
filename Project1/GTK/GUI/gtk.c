@@ -113,17 +113,22 @@ void lunch_ocr()
     SDL_SaveBMP(image_surface, "image_grayscale.bmp");
     load_file("image_grayscale.bmp");
 
-    Otsu(image_surface);
-    SDL_SaveBMP(image_surface, "image_binarized.bmp");
-    load_file("image_binarized.bmp");
+    canny_edge_detection(image_surface);
+    SDL_SaveBMP(image_surface, "image_canny.bmp");
+    load_file("image_canny.bmp");
 
-    Contour(image_surface);
-    SDL_SaveBMP(image_surface, "image_contour.bmp");
-    load_file("image_contour.bmp");
+//    Otsu(image_surface);
+//    SDL_SaveBMP(image_surface, "image_binarized.bmp");
+//    load_file("image_binarized.bmp");
+
+//    Contour(image_surface);
+//    SDL_SaveBMP(image_surface, "image_contour.bmp");
+//    load_file("image_contour.bmp");
 
     remove("image_grayscale.bmp");
-    remove("image_binarized.bmp");
-    remove("image_contour.bmp");
+    remove("image_canny.bmp");
+//    remove("image_binarized.bmp");
+//    remove("image_contour.bmp");
     SDL_FreeSurface(image_surface);
 }
 

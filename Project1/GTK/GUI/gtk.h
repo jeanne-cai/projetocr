@@ -8,6 +8,7 @@
 #include "../segmentation/sdl_base.h"
 #include "../segmentation/segmentation.h"
 #include "../segmentation/otsu.h"
+#include "../segmentation/canny.h"
 
 int gtk_init_window(int argc, char **argv);
 
