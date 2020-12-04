@@ -1,5 +1,11 @@
 #include "sdl_base.h"
 
+#ifdef WIN32
+#pragma comment(lib,"sdl.lib")
+#pragma comment(lib,"sdlmain.lib")
+#endif
+
+
 //############################ Horizontal traitement ############################
 
 int HlineIsEmpty(SDL_Surface *image_surface, int height)
@@ -20,42 +26,132 @@ int HlineIsEmpty(SDL_Surface *image_surface, int height)
 
 
 //############################ Snap ############################
+unsigned char GetPixelComp32(SDL_Surface* surface,int x,int y,int c)
+{ // recupere le pixel x,y de la surfece "surface", la composante c (3 composantes RGB)
+	unsigned char *p = ((unsigned char*)surface->pixels) + y * surface->pitch + x * 4;
+	return p[c];
+}
+
+void PutPixelComp32(SDL_Surface* surface,int x,int y,int c,unsigned char val)
+{ // ecrit la composante c (3 composantes RGB) sur le pixel x,y de la surface "surface"
+	unsigned char *p = ((unsigned char*)surface->pixels) + y * surface->pitch + x * 4;
+	p[c] = val;
+}
+
+void Stretch_Nearest(SDL_Surface* src,SDL_Surface* dest)
+{
+	int i,j,k;
+	double rx,ry;
+	rx = dest->w*1.0/src->w;
+	ry = dest->h*1.0/src->h;
+	for(i=0;i<dest->w;i++)
+		for(j=0;j<dest->h;j++)
+			for(k=0;k<3;k++)
+			{
+				unsigned char pix;
+				pix = GetPixelComp32(src,(int)(i/rx),(int)(j/ry),k);
+				PutPixelComp32(dest,i,j,k,pix);
+			}
+}
+
+SDL_Surface* Strechblit(SDL_Surface* src,int w, int h)
+{
+	SDL_Surface* img = SDL_CreateRGBSurface(SDL_SWSURFACE,w,h,32,0,0,0,0);
+	Stretch_Nearest(src,img);
+	//Stretch_Linear(src,img);
+  return img;
+}
+
+SDL_Surface* redimension(SDL_Surface *letter_surface,int w, int h)
+{
+	return Strechblit(letter_surface,w,h);
+}
+SDL_Surface* marge(SDL_Surface *letter_surface,int addw)
+{
+  SDL_Surface* dest = SDL_CreateRGBSurface(SDL_SWSURFACE,28,28,32,255,255,255,0);
+  int x=0;
+  for(int i=0;i<28;i++)
+  {
+    for(int j=0;j<28;j++)
+    {
+      if (i>=addw && i<28-addw-1)
+      {
+        for(int k=0;k<3;k++)
+        {
+          Uint32 pixel = get_pixel(letter_surface, x, j);
+          put_pixel(dest, i, j, pixel);
+          /*unsigned char pix;
+          pix = GetPixelComp32(letter_surface,x,j,k);
+          PutPixelComp32(dest,i,j,k,pix);*/
+        }
+      }
+      else
+      {
+        Uint32 pixel = get_pixel(dest, i, j);
+        pixel = SDL_MapRGB(dest->format, 255, 255, 255);
+        put_pixel(dest, i, j, pixel);
+      }
+    }
+    if (i>=addw && i<28-addw-1)
+    {
+      x++;
+    }
+  }
+return dest;
+}
+
+
+SDL_Surface* centrer(SDL_Surface *letter_surface,int w)
+{
+  if(w>28){
+    letter_surface= redimension(letter_surface,26,28);
+    return marge(letter_surface,1);
+  }
+  else
+  {
+    letter_surface= redimension(letter_surface,w,28);
+    return marge(letter_surface,(28-w)/2);
+  }
+}
+
 void letter_GrayScale(SDL_Surface *letter_surface, int width, int height)//passer le les letre en blanc et inversement
 {
     Uint8 r, g, b;
 
-	for (int i = 0; i < width; i++)
+    for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
         {
             Uint32 pixel = get_pixel(letter_surface, i, j);
             SDL_GetRGB(pixel, letter_surface->format, &r, &g, &b);
-            Uint8 average = 0.3*r + 0.59*g + 0.11*b;
-            if (average>200){
+            if (r+g-255<b) {
               pixel = SDL_MapRGB(letter_surface->format, 0, 0, 0);
+              r = b;
+              g = b;
             }
-            else
-            {
-              pixel = SDL_MapRGB(letter_surface->format, 255, 255, 255);
-            }
+            r = 255-r;
+            g = 255-g;
+            b = 255-b;
+            pixel = SDL_MapRGB(letter_surface->format, r, g, b);
             put_pixel(letter_surface, i, j, pixel);
         }
     }
 }
 
-void Snap(SDL_Surface *image_surface,int x,int y, int x1, int y1, int maxw, int maxh, const char* filename)
+void Snap(SDL_Surface *image_surface,int x,int y, int x1, int y1, const char* filename)
 {
 	int w = x1 - x;
   int h= y1 - y;
-	SDL_Surface* letter_surface = SDL_CreateRGBSurface(SDL_HWSURFACE, maxw, maxh, 32, 255, 255, 255, 0);
+	SDL_Surface* letter_surface = SDL_CreateRGBSurface(SDL_HWSURFACE, w, h, 32, 255, 255, 255, 0);
 	SDL_Rect position;
 	position.x = x;
 	position.y = y;
 	position.w = w;
 	position.h = h;
 	SDL_BlitSurface(image_surface,&position,letter_surface,NULL);
-  letter_GrayScale(letter_surface,w,h);
-	SDL_SaveBMP(letter_surface, filename);
+  SDL_Surface* nletter_surface =centrer(letter_surface,w);
+  letter_GrayScale(nletter_surface,28,28);
+	SDL_SaveBMP(nletter_surface, filename);
 }
 
 
@@ -76,45 +172,8 @@ int VlineIsEmpty(SDL_Surface *image_surface, int xpos, int h1, int h2)
     return 1;
 }
 
-
-int MaxWidth(SDL_Surface *image_surface, int h1, int h2){
-  int width = image_surface->w;
-  int count[2] = {0, 0};
-  Uint8 r, g, b;
-  int maxw=0;
-  int w;
-  for (int i = 0; i < width; i++) {//pour récupérer maxw
-    if (count[1])
-    {
-      w=count[1]-count[0]-1;
-      if(w>maxw){
-        maxw=w;
-      }
-      count[1] = 0;
-    }
-
-    for (int l = h1; l < h2; l++)
-    {
-        Uint32 pixel = get_pixel(image_surface, i, l);
-        SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
-        if (r < 127)
-        {
-            if(VlineIsEmpty(image_surface, i-1, h1, h2))
-            {
-      count[0] = i-1;
-            }
-            if(VlineIsEmpty(image_surface, i+1, h1, h2))
-            {
-                count[1] = i+1;
-            }
-        }
-    }
-  }
-  return maxw;
-}
-
 int nb_image = 0;
-void VContour(SDL_Surface *image_surface, int h1, int h2, int maxw, int maxh)
+void VContour(SDL_Surface *image_surface, int h1, int h2)
 {
     int width = image_surface->w;
     int count[2] = {0, 0};
@@ -127,7 +186,7 @@ void VContour(SDL_Surface *image_surface, int h1, int h2, int maxw, int maxh)
     		nb_image++;
     		char s[20];
 			sprintf(s, "image/%d", nb_image);
-    		Snap(image_surface, count[0]+1, h1+1, count[1], h2, maxw, maxh, strcat(s,".png"));
+    		Snap(image_surface, count[0]+1, h1+1, count[1], h2, strcat(s,".png"));
     		count[1] = 0;
     	}
 
@@ -179,47 +238,12 @@ void Contour(SDL_Surface *image_surface)
     WhiteCountouring(image_surface);
     int count[2] = {0, 0};
     Uint8 r, g, b;
-    int maxw=0;
-    int maxh=0;
-    int w;
-    int h;
-  for (int i = 0; i < height; i++) {//pour MaxWidth
-    if (count[1])
-    {
-      w=MaxWidth(image_surface, count[0], count[1]);
-      if (w>maxw){
-        maxw=w;
-      }
-      h=count[1]-count[0]-1;
-      if(h>maxh){
-        maxh=h;
-      }
-      count[1] = 0;
-    }
-
-      for (int l = 0; l < width; l++)
-      {
-          Uint32 pixel = get_pixel(image_surface, l, i);
-          SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
-          if (r < 127)
-          {
-              if(HlineIsEmpty(image_surface, i-1))
-              {
-        count[0] = i-1;
-              }
-              if(HlineIsEmpty(image_surface, i+1))
-              {
-                  count[1] = i+1;
-              }
-          }
-      }
-  }
 
 	for (int k = 0; k < height; k++)
     {
     	if (count[1])
     	{
-    		VContour(image_surface, count[0], count[1], maxw, maxh);
+    		VContour(image_surface, count[0], count[1]);
     		count[1] = 0;
     	}
 
