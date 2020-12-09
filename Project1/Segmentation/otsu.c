@@ -1,5 +1,8 @@
 #include "sdl_base.h"
 
+
+// ---- Tools histogram
+
 void init_hist(SDL_Surface *image_surface, size_t w, size_t h, float *hist)
 {
     Uint8 r, g, b;
@@ -19,6 +22,9 @@ void normalized(float *hist, size_t nbPixel)
     for (size_t i = 0; i < 256; i++)
         hist[i] = hist[i] / nbPixel;
 }
+
+
+// ---- Otsu's method
 
 Uint8 otsu_threshold(float *hist)
 {
@@ -42,8 +48,10 @@ Uint8 otsu_threshold(float *hist)
         u0 = sum / w0;
         u1 = (uT - sum) / w1;
 
+        // Maximizing inter-class variance
         vk = w0 * w1 * (u0 - u1) * (u0 - u1);
 
+        // Find max vk = Find threshold
         if (vk > v_max)
         {
             threshold = i;
@@ -53,6 +61,8 @@ Uint8 otsu_threshold(float *hist)
 
     return (Uint8)threshold;
 }
+
+// Main : Otsu's method
 
 void Otsu(SDL_Surface *image_surface)
 {

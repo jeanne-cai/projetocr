@@ -4,17 +4,20 @@
 #include "segmentation.h"
 #include "grayscale.h"
 #include "otsu.h"
-#include "canny.h"
+#include "hough.h"
 
 #define IMG_W 500
 #define IMG_H 500
 
-//---- Main GTK
+
+// ---- GTK Interface
 
 GtkWidget *window;
 GtkWidget *image;
 gchar *filename = "image/image_test0.jpg";
 
+
+// ---- Tools dialog
 
 GtkWidget* create_file_chooser_dialog(GtkFileChooserAction action)
 {
@@ -39,6 +42,11 @@ GtkWidget* create_file_chooser_dialog(GtkFileChooserAction action)
     return dialog;
 }
 
+
+// ---- Button function
+
+// Load image
+
 void load_file(gchar *filename)
 {
     if (filename[0] == 0)
@@ -52,7 +60,7 @@ void load_file(gchar *filename)
         size_t w = image_surface->w;
         size_t h = image_surface->h;
 
-        if (w > IMG_W || h > IMG_H)
+/*        if (w > IMG_W || h > IMG_H)
         {
             if (w > IMG_W)
                 w = IMG_W;
@@ -66,7 +74,7 @@ void load_file(gchar *filename)
                 "image/image_resized.bmp");
         }
         else
-            gtk_image_set_from_file(GTK_IMAGE(image), filename);
+*/            gtk_image_set_from_file(GTK_IMAGE(image), filename);
 
         gtk_window_resize(GTK_WINDOW(window), w, h);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
@@ -75,6 +83,7 @@ void load_file(gchar *filename)
     SDL_FreeSurface(image_surface);
 }
 
+// Choose file
 
 void choose_file()
 {
@@ -90,6 +99,8 @@ void choose_file()
 
     gtk_widget_destroy(dialog);
 }
+
+// Save file
 
 /*void save_file()
 {
@@ -110,6 +121,8 @@ void choose_file()
     gtk_widget_destroy(dialog);
 }*/
 
+// Lunch OCR
+
 void lunch_ocr()
 {
     if (filename[0] == 0)
@@ -120,30 +133,37 @@ void lunch_ocr()
     SDL_Surface *image_surface;
     image_surface = IMG_Load(filename);
 
+    // Apply Grayscale
     GrayScale(image_surface);
     SDL_SaveBMP(image_surface, "image_grayscale.bmp");
     load_file("image_grayscale.bmp");
 
-//    int teta = Hough_Transform(image_surface);
-//    g_print("%d", teta);
-//    SDL_SaveBMP(image_surface, "image_canny.bmp");
-//    load_file("image_canny.bmp");
-
+    // Apply Binarisation
     Otsu(image_surface);
     SDL_SaveBMP(image_surface, "image_binarized.bmp");
     load_file("image_binarized.bmp");
 
+    // Apply Canny and find angle for rotate the image
+    int teta = 90 - Hough_Transform(image_surface);
+    g_print("%d", teta);
+    SDL_SaveBMP(image_surface, "image_canny.bmp");
+    load_file("image_canny.bmp");
+
+    // Apply Segmentation
     Segmentation(image_surface);
     SDL_SaveBMP(image_surface, "image_contour.bmp");
     load_file("image_contour.bmp");
 
+    // Remove all image with filter
     remove("image_grayscale.bmp");
-//    remove("image_canny.bmp");
+    remove("image_canny.bmp");
     remove("image_binarized.bmp");
     remove("image_contour.bmp");
 
     SDL_FreeSurface(image_surface);
 }
+
+// Lunch the neural network
 
 /*void lunch_neuralnetwork()
 {
@@ -151,14 +171,14 @@ void lunch_ocr()
 }*/
 
 
-// Main
+// Main : GTK Interface
 
 int gtk_init_window(int argc, char **argv)
 {
-    // Initializes GTK.
+    // Initializes GTK
     gtk_init(&argc, &argv);
 
-    // Gets the widgets.
+    // Gets the widgets
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     image = gtk_image_new_from_file(filename);
 
@@ -174,7 +194,7 @@ int gtk_init_window(int argc, char **argv)
     gtk_window_set_title(GTK_WINDOW(window), "La compagnie des nez rouges <3");
     gtk_window_set_icon_from_file(GTK_WINDOW(window), "image/logo_OCR.png", NULL);
 
-    // Connects signal handlers.
+    // Connects signal handlers
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(openBMP_button, "clicked", G_CALLBACK(choose_file), NULL);
     g_signal_connect(lunchOCR_button, "clicked", G_CALLBACK(lunch_ocr), NULL);
@@ -191,9 +211,9 @@ int gtk_init_window(int argc, char **argv)
 
     gtk_widget_show_all(window);
 
-    // Runs the main loop.
+    // Runs the main loop
     gtk_main();
 
-    // Exits.
+    // Exits
     return 0;
 }

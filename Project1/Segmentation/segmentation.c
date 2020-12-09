@@ -3,6 +3,7 @@
 
 int nb_image = 0;
 
+
 // ---- Isempty
 
 int line_isempty(SDL_Surface *image_surface, size_t width, size_t h_pos)
@@ -13,7 +14,7 @@ int line_isempty(SDL_Surface *image_surface, size_t width, size_t h_pos)
         Uint32 pixel = get_pixel(image_surface, i, h_pos);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (!r && !b && !g)
+        if (r == 255 && b == 255 && g == 255)
             return 0;
     }
     return 1;
@@ -28,7 +29,8 @@ int column_isempty(SDL_Surface *image_surface, size_t w_pos,
         Uint32 pixel = get_pixel(image_surface, w_pos, h);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (!r && !b && !g)
+        if (r == 255 && b == 255 && g == 255)
+//        if (!r && !b && !g)
             return 0;
     }
     return 1;
@@ -118,7 +120,7 @@ SDL_Surface* resize(SDL_Surface *letter_surface, size_t w, size_t h)
     return Strechblit(letter_surface, w, h);
 }
 
-// ---- letter
+// ---- Letter
 
 SDL_Surface* edge(SDL_Surface *letter_surface, size_t addw)
 {
@@ -232,6 +234,7 @@ void Snap(SDL_Surface *image_surface, size_t x, size_t y,
     SDL_FreeSurface(nletter_surface);
 }
 
+
 // ---- Segmentation
 
 void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
@@ -267,28 +270,25 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
     }
 }
 
-
-// Border White
-
-void WhiteCountouring(SDL_Surface *image_surface, size_t width, size_t height)
+// Border Black
+void BlackCountouring(SDL_Surface *image_surface, size_t width, size_t height)
 {
     Uint32 pixel;
 
     for (size_t i = 0; i < width; i++)
     {
-        pixel = SDL_MapRGB(image_surface->format, 255, 255, 255);
+        pixel = SDL_MapRGB(image_surface->format, 0, 0, 0);
         put_pixel(image_surface, i, 0, pixel);
         put_pixel(image_surface, i, height - 1, pixel);
     }
 
     for (size_t j = 0; j < height; j++)
     {
-        pixel = SDL_MapRGB(image_surface->format, 255, 255, 255);
+        pixel = SDL_MapRGB(image_surface->format, 0, 0, 0);
         put_pixel(image_surface, 0, j, pixel);
         put_pixel(image_surface, width - 1, j, pixel);
     }
 }
-
 
 // Main : Segmentation
 
@@ -300,7 +300,7 @@ void Segmentation(SDL_Surface *image_surface)
     int h1 = 0;
     int h2 = 0;
 
-    WhiteCountouring(image_surface, width, height);
+    BlackCountouring(image_surface, width, height);
 
     for (size_t j = 0; j < height; j++)
     {
