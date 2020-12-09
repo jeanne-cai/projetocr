@@ -1,5 +1,6 @@
+#include <stdlib.h>
 #include <stdio.h>
-#include "GUI/gtk.h"
+#include "gtk.h"
 
 int main(int argc, char **argv)
 {
