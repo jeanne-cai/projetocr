@@ -164,6 +164,22 @@ void lunch_ocr()
     SDL_FreeSurface(image_surface);
 }
 
+void rotate90()
+{
+  if (filename[0] == 0)
+      return;
+      
+  SDL_Surface* image_surface;
+  image_surface = IMG_Load(filename);
+  image_surface = Rotate(image_surface,90);
+  SDL_SaveBMP(image_surface, "image/image_rotate90.bmp");
+  gtk_image_set_from_file(GTK_IMAGE(image),
+      "image/image_rotate90.bmp");
+  load_file("image/image_rotate90.bmp");
+  filename = "image/image_rotate90.bmp";
+  SDL_FreeSurface(image_surface);
+}
+
 // Lunch the neural network
 
 /*void lunch_neuralnetwork()
@@ -188,6 +204,7 @@ int gtk_init_window(int argc, char **argv)
 
     GtkWidget* openBMP_button = gtk_button_new_with_label("Open image");
     GtkWidget* lunchOCR_button = gtk_button_new_with_label("Lunch OCR");
+    GtkWidget* Rotate90_button = gtk_button_new_with_label("Rotate 90°");
 //    GtkWidget* NN_button = gtk_button_new_with_label("Neural Network");
 
     // Window parameter
@@ -199,6 +216,8 @@ int gtk_init_window(int argc, char **argv)
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(openBMP_button, "clicked", G_CALLBACK(choose_file), NULL);
     g_signal_connect(lunchOCR_button, "clicked", G_CALLBACK(lunch_ocr), NULL);
+    g_signal_connect(Rotate90_button, "clicked", G_CALLBACK(rotate90), NULL);
+
 //    g_signal_connect(NN_button, "clicked", G_CALLBACK(lunch_neuralnetwork), NULL);
 
     // Box
@@ -207,6 +226,7 @@ int gtk_init_window(int argc, char **argv)
     /*A inserer un autre pour afficher le texte*/
     gtk_box_pack_start(GTK_BOX(box_1), openBMP_button, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box_1), lunchOCR_button, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box_1), Rotate90_button, FALSE, TRUE, 0);
 //    gtk_box_pack_start(GTK_BOX(box_1), NN_button, FALSE, TRUE, 0);
     gtk_container_add(GTK_CONTAINER(window), main_box);
 
