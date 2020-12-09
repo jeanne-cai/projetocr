@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "matrice.h"
+#include "layer.h"
 #include <math.h>
 
 void init_array(int length,float **tab)
@@ -9,12 +10,11 @@ void init_array(int length,float **tab)
 	//ALLOCATION DYNAMIQUE
 	*tab = calloc (length ,sizeof(float));
 }
-void random_matrice(int length, int width, float **tab)
+void random_matrice(int length, int width, float **tab, int nbNeuronsPreviousLayer)
 {
-	int min = -1, max=1;
 	for(int i =0; i<length; i++)
 		for(int j=0;j<width;j++)
-			tab[i][j]= min + (max-min)*(rand()/(float)(RAND_MAX)); 
+			tab[i][j]= randn()/sqrt(nbNeuronsPreviousLayer); 
 
 }
 

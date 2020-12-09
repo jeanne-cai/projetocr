@@ -6,6 +6,7 @@
 #include "network.h"
 #include "matrice.h"
 #include "tools.h"
+#include "dataSet.h"
 #include <math.h>
 
 
@@ -93,8 +94,7 @@ void backpropagation(Network *network, float *dataInput, float *expectedResult)
 	for (int i = 0; i < nbNeuronOutputLayer; ++i)
 	{
 		outputLayer->cost[i] = 
-		(outputLayer->valuesNeurons[i]-expectedResult[i])
-						*sigmoidPrime(outputLayer->z[i]);								
+		(outputLayer->valuesNeurons[i]-expectedResult[i]);								
 	}
 
 	//Backpropagation
@@ -124,17 +124,37 @@ void backpropagation(Network *network, float *dataInput, float *expectedResult)
 	}
 }
 
-void train(Network *network, float **dataInput, float **expectedResult, 
-	float learningRate,long epoch, int nbInputs)
+void sgd(Dataset *training_data, size_t epochs, size_t mini_batch_size, float learning_rate, Dataset *test_data,Network *network)
 {
-	for(long i=0; i<epoch;i++)
-	{
+	size_t nbCorrect;
+	//printf("bouillant\n");
+  	for(size_t i=0; i<epochs; i++){
+  	//	printf("chaudchaudchaud\n");
+    	dataset_shuffle(training_data);
+    //	printf("lourdlamif\n");
+    	size_t nb_batch = training_data->size/mini_batch_size;
+    	Dataset *mini_batches = generate_batches(training_data, nb_batch,mini_batch_size );
+    //	printf(":'(\n");
+    	for(size_t j = 0; j<nb_batch; j++){
+    //		printf("presqueomg\n");
+      		train_batch(network,mini_batches->inputs,mini_batches->outputs,learning_rate,mini_batch_size);
+      //		printf("ohyeahbb\n");
+    	}
+    	if(test_data->size > 0){
+    		nbCorrect=evaluateNetwork(network, test_data);
+    		printf("\n %ld éléments reconnus correct sur %ld\n",nbCorrect,test_data->size);
+    	}
+    }
+}
+
+void train_batch(Network *network, float **dataInput, float **expectedResult, 
+	float learningRate, int nbInputs)
+{
 		for(int j=0;j<nbInputs;j++){
 			backpropagation(network,dataInput[j],expectedResult[j]);
 			// _print_network(*network);
 		}
 		applyModif(network,learningRate,nbInputs);
-	}
 }
 
 void applyModif(Network *network, float learningRate, int nbInputs)
@@ -158,6 +178,36 @@ void applyModif(Network *network, float learningRate, int nbInputs)
 		}
 	}
 
+}
+char getOutputChar(float tab[], size_t sizeMax)
+{
+	int indexMax=0;
+	float max=tab[0],inter;
+	
+	for(size_t j=1;j<sizeMax;j++)
+	{
+		inter=tab[j];
+		if (max<inter)
+		{
+			max=inter;
+			indexMax=j;
+		}
+	}
+	return getCodeChar(indexMax);
+
+}
+size_t evaluateNetwork(Network *network, Dataset *dataset){
+	int sizeMax=dataset->output_size;
+	size_t nbCorrect = 0;
+	char cresult,ctarget;
+	for(size_t i=0; i<dataset->size; i++){
+		feed_forward(network, dataset->inputs[i]);
+		ctarget=getOutputChar(dataset->outputs[i],sizeMax);
+		cresult=getOutputChar(network->outputLayer->valuesNeurons,sizeMax);
+		if(cresult==ctarget)
+				nbCorrect++;
+	}	
+	return nbCorrect;
 }
 
 int is_Save()
@@ -225,7 +275,7 @@ void save_network(Network network)
 
 
 }
-void read_network(Network *network,FILE **file, int *arrLayer)
+void read_network(Network *network,FILE **file)
 {
 	int nbLayer;
 	
@@ -233,7 +283,7 @@ void read_network(Network *network,FILE **file, int *arrLayer)
 	fscanf(*file,"%d\n",&nbLayer);
 	
 	//Dynamic allocation
-	arrLayer=malloc(nbLayer*sizeof(int));
+	int *arrLayer=malloc(nbLayer*sizeof(int));
 	
 	//write the number of neurons per layer
 	for(int i=0; i<nbLayer;i++){
@@ -264,7 +314,7 @@ void read_network(Network *network,FILE **file, int *arrLayer)
 		}
 	}
 }
-void load_network(Network *network,int *arrLayer)
+void load_network(Network *network)
 {
 	char nameoffile[100];
 	printf("Please enter a name for your file : ");
@@ -281,7 +331,7 @@ void load_network(Network *network,int *arrLayer)
 	}
 
 	//write in the file
-	read_network(network,&file,arrLayer);
+	read_network(network,&file);
 	
 	//free memory
 	fclose(file);
@@ -289,6 +339,9 @@ void load_network(Network *network,int *arrLayer)
 void free_network(Network *network){
 	free(network->arrLayer);
 }
+
+
+
 /*void print_network(Network network){
 	printf("===========================================================\n\n");
 	//info layer 0

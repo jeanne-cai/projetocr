@@ -7,7 +7,7 @@
 #include <math.h>
 
 void init_array(int length,float **tab);
-void random_matrice(int length, int width, float **tab);
+void random_matrice(int length, int width, float **tab, int nbNeuronsPreviousLayer);
 void produit_matrice(int line1,int col1,float **mat1,float *mat2,float *matResult);
 void somme_arrays(int taille, float *mat1, float *mat2, float *mat3);
 void affiche_array(int length, float *arr);

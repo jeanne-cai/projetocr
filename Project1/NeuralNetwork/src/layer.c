@@ -21,7 +21,7 @@ Layer new_layer(int nbNeuron, Layer *previousLayer){
 		for(int i =0; i<nbNeuron;i++)
 			//2nd dimension
 			layer.weights[i] = malloc (previousLayer->nbNeuron*sizeof(float));
-		init_weights(nbNeuron,previousLayer->nbNeuron,layer.weights);
+		init_weights(nbNeuron,previousLayer->nbNeuron,layer.weights, previousLayer->nbNeuron);
 		
 
 		//For backpropagation
@@ -39,15 +39,38 @@ Layer new_layer(int nbNeuron, Layer *previousLayer){
 	return layer;
 }
 
-void init_weights(int l, int c,float **weights)
+void init_weights(int l, int c,float **weights, int nbNeuronsPreviousLayer)
 {
-	random_matrice(l,c,weights);
+	random_matrice(l,c,weights,nbNeuronsPreviousLayer);
 }
 
 void init_biais(int l, float *valuesBiases )
 {
-
-	int min = -1, max=1;
 	for(int i =0; i<l; i++)
-		valuesBiases[i]= min + (max-min)*(rand()/(float)(RAND_MAX));
+		valuesBiases[i]=randn();
+}
+
+float randn() {
+    double u1, u2, w, mult;
+    static double x1, x2;
+    static int use_previous = 0;
+
+    if (use_previous == 1) {
+        use_previous = !use_previous;
+        return x2;
+    }
+
+    do {
+        u1 = -1 + ((double) rand() / RAND_MAX) * 2;
+        u2 = -1 + ((double) rand() / RAND_MAX) * 2;
+        w = pow(u1, 2) + pow(u2, 2);
+    } while (w >= 1 || w == 0);
+
+    mult = sqrt((-2 * log(w)) / w);
+    x1 = u1 * mult;
+    x2 = u2 * mult;
+
+    use_previous = !use_previous;
+
+    return x1;
 }

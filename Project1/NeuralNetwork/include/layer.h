@@ -16,7 +16,8 @@ struct layer{
 };
 
 Layer new_layer(int nbNeuron, Layer *previousLayer);
-void init_weights(int l, int c, float **weights);
+void init_weights(int l, int c, float **weights, int nbNeuronsPreviousLayer);
 void init_biais(int l, float *valuesBiases);
+float randn();
 
 #endif 
