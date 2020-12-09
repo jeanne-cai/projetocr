@@ -146,6 +146,7 @@ void lunch_ocr()
     // Apply Canny and find angle for rotate the image
     int teta = 90 - Hough_Transform(image_surface);
     g_print("%d", teta);
+    image_surface = Rotate(image_surface, teta);
     SDL_SaveBMP(image_surface, "image_canny.bmp");
     load_file("image_canny.bmp");
 
