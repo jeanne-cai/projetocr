@@ -14,7 +14,7 @@ int line_isempty(SDL_Surface *image_surface, size_t width, size_t h_pos)
         Uint32 pixel = get_pixel(image_surface, i, h_pos);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r == 255 && b == 255 && g == 255)
+        if (r == 0 && b == 0 && g == 0)
             return 0;
     }
     return 1;
@@ -29,7 +29,7 @@ int column_isempty(SDL_Surface *image_surface, size_t w_pos,
         Uint32 pixel = get_pixel(image_surface, w_pos, h);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r == 255 && b == 255 && g == 255)
+        if (r == 0 && b == 0 && g == 0)
 //        if (!r && !b && !g)
             return 0;
     }
@@ -277,14 +277,14 @@ void BlackCountouring(SDL_Surface *image_surface, size_t width, size_t height)
 
     for (size_t i = 0; i < width; i++)
     {
-        pixel = SDL_MapRGB(image_surface->format, 0, 0, 0);
+        pixel = SDL_MapRGB(image_surface->format, 255, 255, 255);
         put_pixel(image_surface, i, 0, pixel);
         put_pixel(image_surface, i, height - 1, pixel);
     }
 
     for (size_t j = 0; j < height; j++)
     {
-        pixel = SDL_MapRGB(image_surface->format, 0, 0, 0);
+        pixel = SDL_MapRGB(image_surface->format, 255, 255, 255);
         put_pixel(image_surface, 0, j, pixel);
         put_pixel(image_surface, width - 1, j, pixel);
     }

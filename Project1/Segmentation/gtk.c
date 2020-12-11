@@ -47,16 +47,18 @@ GtkWidget* create_file_chooser_dialog(GtkFileChooserAction action)
 
 // Load image
 
-void load_file(gchar *filename)
+void load_file(gchar *file)
 {
     if (filename[0] == 0)
         return;
 
     SDL_Surface* image_surface;
-    image_surface = IMG_Load(filename);
+    image_surface = IMG_Load(file);
 
     if (image_surface)
     {
+        filename = file;
+
         size_t w = image_surface->w;
         size_t h = image_surface->h;
 
@@ -73,9 +75,8 @@ void load_file(gchar *filename)
             gtk_image_set_from_file(GTK_IMAGE(image),
                 "image/image_resized.bmp");
         }
-        else
-*/            gtk_image_set_from_file(GTK_IMAGE(image), filename);
-
+        else*/
+        gtk_image_set_from_file(GTK_IMAGE(image), filename);
         gtk_window_resize(GTK_WINDOW(window), w, h);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     }
@@ -125,59 +126,46 @@ void choose_file()
 
 void lunch_ocr()
 {
-    if (filename[0] == 0)
-        return;
-
-    init_sdl();
-
     SDL_Surface *image_surface;
     image_surface = IMG_Load(filename);
 
     // Apply Grayscale
     GrayScale(image_surface);
-    SDL_SaveBMP(image_surface, "image_grayscale.bmp");
-    load_file("image_grayscale.bmp");
+    SDL_SaveBMP(image_surface, "image/seg_image-grayscale.bmp");
+    load_file("image/seg_image-grayscale.bmp");
 
     // Apply Binarisation
     Otsu(image_surface);
-    SDL_SaveBMP(image_surface, "image_binarized.bmp");
-    load_file("image_binarized.bmp");
+    SDL_SaveBMP(image_surface, "image/seg_image-binarized.bmp");
+    load_file("image/seg_image-binarized.bmp");
 
     // Apply Canny and find angle for rotate the image
-    int teta = 90 - Hough_Transform(image_surface);
-    g_print("%d", teta);
-    image_surface = Rotate(image_surface, teta);
-    SDL_SaveBMP(image_surface, "image_canny.bmp");
-    load_file("image_canny.bmp");
+    int angle = Hough_Transform(image_surface);
+    image_surface = Rotate(image_surface, angle);
+    SDL_SaveBMP(image_surface, "image/seg_image-canny.bmp");
+    load_file("image/seg_image-binarized.bmp");
 
     // Apply Segmentation
     Segmentation(image_surface);
-    SDL_SaveBMP(image_surface, "image_contour.bmp");
-    load_file("image_contour.bmp");
+    SDL_SaveBMP(image_surface, "image/seg_image-contour.bmp");
+    load_file("image/seg_image-contour.bmp");
 
-    // Remove all image with filter
-    remove("image_grayscale.bmp");
-    remove("image_canny.bmp");
-    remove("image_binarized.bmp");
-    remove("image_contour.bmp");
+    // Final image
+    SDL_SaveBMP(image_surface, "image/seg_image_ocr.bmp");
 
     SDL_FreeSurface(image_surface);
 }
 
 void rotate90()
 {
-  if (filename[0] == 0)
-      return;
-      
-  SDL_Surface* image_surface;
-  image_surface = IMG_Load(filename);
-  image_surface = Rotate(image_surface,90);
-  SDL_SaveBMP(image_surface, "image/image_rotate90.bmp");
-  gtk_image_set_from_file(GTK_IMAGE(image),
-      "image/image_rotate90.bmp");
-  load_file("image/image_rotate90.bmp");
-  filename = "image/image_rotate90.bmp";
-  SDL_FreeSurface(image_surface);
+    SDL_Surface* image_surface;
+    image_surface = IMG_Load(filename);
+
+    image_surface = Rotate(image_surface, 90);
+    SDL_SaveBMP(image_surface, "image/seg_image-rotate90.bmp");
+    load_file("image/seg_image-rotate90.bmp");
+
+    SDL_FreeSurface(image_surface);
 }
 
 // Lunch the neural network
@@ -204,7 +192,7 @@ int gtk_init_window(int argc, char **argv)
 
     GtkWidget* openBMP_button = gtk_button_new_with_label("Open image");
     GtkWidget* lunchOCR_button = gtk_button_new_with_label("Lunch OCR");
-    GtkWidget* Rotate90_button = gtk_button_new_with_label("Rotate 90°");
+    GtkWidget* rotate90_button = gtk_button_new_with_label("Rotate 90°");
 //    GtkWidget* NN_button = gtk_button_new_with_label("Neural Network");
 
     // Window parameter
@@ -216,7 +204,7 @@ int gtk_init_window(int argc, char **argv)
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(openBMP_button, "clicked", G_CALLBACK(choose_file), NULL);
     g_signal_connect(lunchOCR_button, "clicked", G_CALLBACK(lunch_ocr), NULL);
-    g_signal_connect(Rotate90_button, "clicked", G_CALLBACK(rotate90), NULL);
+    g_signal_connect(rotate90_button, "clicked", G_CALLBACK(rotate90), NULL);
 
 //    g_signal_connect(NN_button, "clicked", G_CALLBACK(lunch_neuralnetwork), NULL);
 
@@ -226,7 +214,7 @@ int gtk_init_window(int argc, char **argv)
     /*A inserer un autre pour afficher le texte*/
     gtk_box_pack_start(GTK_BOX(box_1), openBMP_button, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box_1), lunchOCR_button, FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(box_1), Rotate90_button, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box_1), rotate90_button, FALSE, TRUE, 0);
 //    gtk_box_pack_start(GTK_BOX(box_1), NN_button, FALSE, TRUE, 0);
     gtk_container_add(GTK_CONTAINER(window), main_box);
 

@@ -263,7 +263,7 @@ int Hough_Transform(SDL_Surface *image_surface)
 
     // Apply Canny filter
     canny_edge_detection(m, width, height);
-    matrix_to_image(image_surface, width, height, m);
+//    matrix_to_image(image_surface, width, height, m);
 
     // Uses the parametric representation of a line
     // rho : distance perpendicular to the line
@@ -296,51 +296,64 @@ int Hough_Transform(SDL_Surface *image_surface)
         }
     }
 
+    // -90 <= theta < 90 
+    theta_max -= 90;
+
     free(m);
     free(f);
 
     return theta_max;
 }
 
-//effectue une rotation centrale d'angle en degre.
+// ---- Rotation
+
+// Main : Rotate
+
+// Make a central rotation of angle in degrees
 SDL_Surface* Rotate(SDL_Surface* origine, float angle)
 {
+    Uint32 pixel;
+    int bx, by;
 
-  Uint32 pixel;
-  int bx, by;
+    // Angle in radians
+    float angle_radian = -angle * M_PI / 180.0;
 
-  /* determine la valeur en radian de l'angle*/
-  float angle_radian = -angle * M_PI / 180.0;
+    // Find the size of the image dest
+    float tcos = cos(angle_radian);
+    float tsin = sin(angle_radian);
 
-  /*calcul de la taille de l'image de destination*/
-  float tcos = cos(angle_radian);
-  float tsin = sin(angle_radian);
-  double largeurdest=   ceil(origine->w * fabs(tcos) + origine->h * fabs(tsin));
-  double hauteurdest=   ceil( origine->w * fabs(tsin) + origine->h * fabs(tcos));
-  SDL_Surface* dest = SDL_CreateRGBSurface(SDL_HWSURFACE, largeurdest, hauteurdest, origine->format->BitsPerPixel,
-              origine->format->Rmask, origine->format->Gmask, origine->format->Bmask, origine->format->Amask);
+    double width_dest = ceil(origine->w * fabs(tcos) + origine->h * fabs(tsin));
+    double height_dest = ceil(origine->w * fabs(tsin) + origine->h * fabs(tcos));
 
-    if(dest==NULL)
-      return NULL;
-    int mxdest = dest->w/2;
-    int mydest = dest->h/2;
-    int mx = origine->w/2;
-    int my = origine->h/2;
+    SDL_Surface* dest = SDL_CreateRGBSurface(SDL_HWSURFACE, width_dest,
+                            height_dest, origine->format->BitsPerPixel,
+                            origine->format->Rmask, origine->format->Gmask,
+                            origine->format->Bmask, origine->format->Amask);
 
-   for(int j=0;j<dest->h;j++)
+    if(dest == NULL)
+        return NULL;
 
-      for(int i=0;i<dest->w;i++)
-      {
-    /* on determine la meilleure position sur la surface d'origine en appliquant
-     * une matrice de rotation inverse
-     */
-     bx = (ceil (tcos * (i-mxdest) + tsin * (j-mydest) + mx));
-     by = (ceil (-tsin * (i-mxdest) + tcos * (j-mydest) + my));
-       if (bx>=0 && bx< origine->w && by>=0 && by< origine->h)
-       {
-         pixel = get_pixel(origine, bx, by);
-         put_pixel(dest, i, j, pixel);
-       }
+    int mxdest = dest->w / 2;
+    int mydest = dest->h / 2;
+    int mx = origine->w / 2;
+    int my = origine->h / 2;
+
+    for (int j = 0; j < dest->h; j++)
+    {
+        for (int i = 0; i < dest->w; i++)
+        {
+            // Find the best position on the orignal surface
+            // by applying a reverse rotation matrix
+            bx = ceil(tcos * (i - mxdest) + tsin * (j - mydest) + mx);
+            by = ceil(-tsin * (i - mxdest) + tcos * (j - mydest) + my);
+
+            if (bx >= 0 && bx < origine->w && by >= 0 && by < origine->h)
+            {
+                pixel = get_pixel(origine, bx, by);
+                put_pixel(dest, i, j, pixel);
+            }
+        }
     }
-  return dest;
+
+    return dest;
 }
