@@ -20,14 +20,14 @@ double* init_matrix(size_t len)
 void image_to_matrix(SDL_Surface *image_surface, double m[], size_t w, size_t h)
 {
     Uint8 r, g, b;
-    for(size_t i = 0; i < w; i++)
+    for(size_t i = 0; i < h; i++)
     {
-        for(size_t j = 0; j < h; j++)
+        for(size_t j = 0; j < w; j++)
         {
-            Uint32 pixel = get_pixel(image_surface, i, j);
+            Uint32 pixel = get_pixel(image_surface, j, i);
             SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-            m[i * h + j] = r;
+            m[i * w + j] = r;
         }
     }
 }

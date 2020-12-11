@@ -245,7 +245,7 @@ char Snap(SDL_Surface *image_surface, size_t x, size_t y,
     printf("%c\n",c);
     for(size_t j=0; j<28;j++){
             for(size_t k=0; k<28;k++){
-                float f = matrix_image[j*28+k];
+                float f = matrix_image[j*28+k]/255;
                 if(f>0.1){
                     printf("\033[41m");
                 }
