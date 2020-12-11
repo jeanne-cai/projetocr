@@ -2,7 +2,7 @@
 #define SDL_BASE_H_
 
 #include <SDL.h>
-#include "SDL/SDL_image.h"
+#include <SDL_image.h>
 
 void init_sdl();
 void SDL_FreeSurface(SDL_Surface *surface);
