@@ -19,6 +19,7 @@ void initialise_output(char label, Dataset *training_data,int i);
 void initialise_input(char *str,Dataset *training_data, int i);
 void dataset_initialise_input_output(FILE* file,Dataset *training_data,int sizeInputs);
 void initialiseDataSet(Dataset *training_data,char path_file[]);
+void split_dataSet(Dataset *data_set,Dataset *training_data,Dataset *test_data,int percent_of_test);
 void dataset_free(Dataset *dataset);
 void swap(float **a, float **b);
 void dataset_shuffle(Dataset *dataset);

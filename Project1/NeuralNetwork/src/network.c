@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "dataSet.h"
 #include "network.h"
 #include "layer.h"
 #include "network.h"
@@ -9,6 +10,13 @@
 #include "dataSet.h"
 #include <math.h>
 
+char arr_to_char(double *arr,Network *network)
+{	float inputs[784];
+	for(int i=0;i<784;i++)
+		inputs[i]=arr[i]/255.f*0.99+0.01;
+	feed_forward(network,inputs);
+	return getOutputChar(network->outputLayer->valuesNeurons,72);
+}
 
 int init_network(Network *network,int nbLayer, int nbNeuronPerLayer[]){
 
@@ -133,16 +141,18 @@ void sgd(Dataset *training_data, size_t epochs, size_t mini_batch_size, float le
     	dataset_shuffle(training_data);
     //	printf("lourdlamif\n");
     	size_t nb_batch = training_data->size/mini_batch_size;
+    //	printf("training_data size =%ld\n",training_data->size);
+    //	printf("nb_batch=%ld\n",nb_batch);
     	Dataset *mini_batches = generate_batches(training_data, nb_batch,mini_batch_size );
     //	printf(":'(\n");
     	for(size_t j = 0; j<nb_batch; j++){
-    //		printf("presqueomg\n");
-      		train_batch(network,mini_batches->inputs,mini_batches->outputs,learning_rate,mini_batch_size);
-      //		printf("ohyeahbb\n");
+    		//printf("presqueomg\n");
+      		train_batch(network,mini_batches[j].inputs,mini_batches[j].outputs,learning_rate,mini_batch_size);
+      		//printf("ohyeahbb\n");
     	}
     	if(test_data->size > 0){
     		nbCorrect=evaluateNetwork(network, test_data);
-    		printf("\n %ld éléments reconnus correct sur %ld\n",nbCorrect,test_data->size);
+    		printf("\nepoch %ld :  %ld éléments reconnus correct sur %ld, %.3f\n", i, nbCorrect,test_data->size, (float)nbCorrect/test_data->size);
     	}
     }
 }
@@ -278,16 +288,25 @@ void save_network(Network network)
 void read_network(Network *network,FILE **file)
 {
 	int nbLayer;
+	int retour;
 	
 	//write the number of layer
-	fscanf(*file,"%d\n",&nbLayer);
+	retour=fscanf(*file,"%d\n",&nbLayer);
+	if(retour==0){
+		printf("read network: erreur\n");
+		exit(-1);
+	}
 	
 	//Dynamic allocation
 	int *arrLayer=malloc(nbLayer*sizeof(int));
 	
 	//write the number of neurons per layer
 	for(int i=0; i<nbLayer;i++){
-		fscanf(*file,"%d\n",&(arrLayer[i]));
+		retour=fscanf(*file,"%d\n",&(arrLayer[i]));
+		if(retour==0){
+			printf("read network: erreur\n");
+			exit(-1);
+		}
 	}
 
 	//initialisation of network
@@ -298,7 +317,11 @@ void read_network(Network *network,FILE **file)
 	{
 		for(int j=0;j<network->arrLayer[i].nbNeuron;j++)
 		{
-			fscanf(*file,"%f\n",&(network->arrLayer[i].valuesBiases[j]));
+			retour=fscanf(*file,"%f\n",&(network->arrLayer[i].valuesBiases[j]));
+			if(retour==0){
+				printf("read network: erreur\n");
+				exit(-1);
+			}
 		}
 	}
 
@@ -309,17 +332,17 @@ void read_network(Network *network,FILE **file)
 		{
 			for(int k=0;k<network->arrLayer[i-1].nbNeuron;k++)
 			{
-				fscanf(*file,"%f\n",&(network->arrLayer[i].weights[j][k]));
+				retour=fscanf(*file,"%f\n",&(network->arrLayer[i].weights[j][k]));
+				if(retour==0){
+					printf("read network: erreur\n");
+					exit(-1);
+				}
 			}
 		}
 	}
 }
-void load_network(Network *network)
+void load_network(Network *network,char *nameoffile)
 {
-	char nameoffile[100];
-	printf("Please enter a name for your file : ");
-
-	secuScanf("%s",nameoffile);
 	
 	//open the folder
 	FILE* file=NULL;

@@ -8,7 +8,7 @@
 #include "dataSet.h"
 #include "tools.h"
 
-int NB_DATA=7739;
+int NB_DATA=7100;
 
 void print_valuesNeurons(Network network)
 {
@@ -32,8 +32,14 @@ int main()
 	char path_file[]="dataSetfile.csv";
 	Network network;
 
+	Dataset data_set;
 	Dataset training_data;
-	initialiseDataSet(&training_data,path_file);
+	Dataset test_data;
+	int percent_of_test=20;
+
+	initialiseDataSet(&data_set,path_file);
+	split_dataSet(&data_set,&training_data,&test_data,percent_of_test);
+	printf("training_data  MAIN=%ld",training_data.size);
 	/*for(int i =0; i<NB_DATA;i++)
 	{
 		printf("Input :\n");
@@ -55,24 +61,31 @@ int main()
 	exit(1);*/
 
 	//load previous network?
-	char answer;
-	printf("Do you want to load previous neural network? (Y/N) : ");
-	secuScanf("%c",&answer);
+	//char answer;
+	//printf("Do you want to load previous neural network? (Y/N) : ");
+	//secuScanf("%c",&answer);
 	
 	//yes
-	if(answer=='y'||answer=='Y')
-	{
-		load_network(&network);
-	}
-	//no
-	else
-	{
+	// if(answer=='y'||answer=='Y')
+	// {
+	// 	load_network(&network);
+	// }
+	// //no
+	// else
+	// {
+		printf("okguuud\n");
 		size_t nbLayer = 3;
-		int arrLayer[] = {784,200,72};
+		int arrLayer[] = {784,100,72};
+		printf("okigoudgoud\n");
 		init_network(&network, nbLayer, arrLayer);
+		printf("okigoudgoudgouuuuud\n");
+
 		//train network
-		sgd(&training_data, 1000, 10, 10.f, &training_data,&network);
-	}
+		sgd(&training_data, 200, 5, 0.3f, &test_data,&network);
+		//1000 5 0.3
+		printf("oyeahbaby\n");
+
+	//}
 
 	//save weights and biases
 	save_network(network);

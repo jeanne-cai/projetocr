@@ -8,6 +8,12 @@ void cleanBuffer()
   while((c=getchar())!='\n' && c!= EOF);
 }
 void secuScanf(char* format, void* ref){
-	scanf(format,ref);
+	int retour;
+	retour=scanf(format,ref);
+	if(retour==0)
+	{
+		printf("secuScanf:ereur\n");
+		exit(-1);
+	}
 	cleanBuffer();
 }

@@ -13,7 +13,7 @@ struct network{
 	Layer *inputLayer;
 	Layer *outputLayer;
 };
-
+char arr_to_char(double *arr,Network *network);
 int init_network(Network *network,int nbLayer, int nbNeuronPerLayer[]);
 void free_network(Network *network);
 float sigmoid(float z);
@@ -30,7 +30,7 @@ int is_Save();
 void cleanBuffer();
 void write_network(Network network,FILE **file);
 void save_network(Network network);
-void load_network(Network *network);
+void load_network(Network *network,char *nameoffile);
 void read_network(Network *network,FILE **file);
 void sgd(Dataset *training_data, size_t epochs, size_t mini_batch_size, float learning_rate, Dataset *test_data,Network *network);
 

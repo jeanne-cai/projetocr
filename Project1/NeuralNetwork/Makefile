@@ -1,7 +1,7 @@
 EXEC = ocr
 CPPFLAGS = -MMD
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -Wpointer-arith -Iinclude
+CFLAGS = -Wall -Wextra -std=c99 -Wpointer-arith -Iinclude -O3
 LDFLAGS = -lm
 LDLIBS =
 

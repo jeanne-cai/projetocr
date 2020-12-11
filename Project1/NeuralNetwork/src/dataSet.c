@@ -146,12 +146,18 @@ void dataset_initialise_input_output(FILE* file,Dataset *training_data,int sizeI
 {
   int sizeMaxLine=sizeInputs*4+2;
   char label;
+  char *retour;
   char str[sizeMaxLine];
   //printf("ayayayeuh\n");
   for(int i=0;i<NB_DATA;i++)
   {
     //printf("oulah ok : i=%d\n",i);
-    fgets(str,sizeMaxLine,file);
+    retour=fgets(str,sizeMaxLine,file);
+    if(retour==NULL){
+      printf("dataset_initialise_input_output : error\n");
+      exit(-1);
+    }
+  
     //printf("prout\n");
     label=str[0];
     initialise_output(label, training_data,i);
@@ -190,14 +196,54 @@ void initialiseDataSet(Dataset *training_data,char path_file[])
   fclose(file);
 
 }
+void split_dataSet(Dataset *data_set, Dataset *training_data, Dataset *test_data, int percent_of_test){
+  size_t sizeTest=percent_of_test*NB_DATA/100;
+
+  printf("pourcentage = %d\n",percent_of_test);
+  printf("nbDonnées Tests = %ld\n",sizeTest);
+  printf("adresse data set = %p\n",data_set);
+  
+  training_data->inputs=(data_set->inputs);
+  training_data->outputs=(data_set->outputs);
+
+  training_data->output_size=data_set->output_size;
+  training_data->input_size=data_set->input_size;
+  
+  training_data->size_height=data_set->size_height;
+  training_data->size_width=data_set->size_width;
+
+  printf("adresse taining =%p\n",training_data);
+  
+  training_data->size = NB_DATA-sizeTest;
+  test_data->inputs=((data_set->inputs)+training_data->size);
+  test_data->outputs=((data_set->outputs)+training_data->size);
+  
+  printf("adresse test =%p\n",test_data);
+
+  test_data->size=sizeTest;
+  
+  printf("lolol\n");
+  
+  test_data->output_size=data_set->output_size;
+  test_data->input_size=data_set->input_size;
+  
+  test_data->size_height=data_set->size_height;
+  test_data->size_width=data_set->size_width;
+
+  printf("training data size = %ld\n",training_data->size);
+
+}
 Dataset *generate_batches(Dataset *training_data,size_t nb_batch,size_t mini_batch_size )
 {
+  //printf("mini_vbatch size = %ld\n nb_batch = %ld\n",mini_batch_size,nb_batch);
   Dataset *batches = calloc(nb_batch, sizeof(Dataset));
     if(batches == NULL) exit(-1);
+    //printf("jspr ca marche\n");
 
   
   for(size_t i =0;i<nb_batch;i++)
   {
+    //printf("héhé\n");
     dataset_new(&batches[i], mini_batch_size, 3, 2) ;
     for(size_t j =0;j<mini_batch_size;j++)
     {
@@ -205,6 +251,7 @@ Dataset *generate_batches(Dataset *training_data,size_t nb_batch,size_t mini_bat
       batches[i].outputs[j]=training_data->outputs[i*mini_batch_size+j];
   
     }
+    //printf("bggggggg\n");
   }
   return batches;
 }
@@ -241,3 +288,4 @@ void dataset_free(Dataset *dataset) {
 
     dataset->size = 0;
 }
+
