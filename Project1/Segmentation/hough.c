@@ -150,7 +150,7 @@ void double_thresholding(double g[], size_t w, size_t h)
         for(size_t j = 1; j < h - 1; j++)
         {
             if (g[i*h+j] < T_Low)
-                g[i*h+j] = 0; 
+                g[i*h+j] = 0;
             else if (g[i*h+j] > T_High)
                 g[i*h+j] = 255;
             else
@@ -296,7 +296,7 @@ int Hough_Transform(SDL_Surface *image_surface)
         }
     }
 
-    // -90 <= theta < 90 
+    // -90 <= theta < 90
     theta_max -= 90;
 
     free(m);
@@ -351,6 +351,11 @@ SDL_Surface* Rotate(SDL_Surface* origine, float angle)
             {
                 pixel = get_pixel(origine, bx, by);
                 put_pixel(dest, i, j, pixel);
+            }
+            else
+            {
+              pixel = SDL_MapRGB(dest->format, 255, 255, 255);
+              put_pixel(dest, i, j, pixel);
             }
         }
     }

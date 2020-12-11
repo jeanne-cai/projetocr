@@ -90,9 +90,11 @@ void Stretch_Nearest(SDL_Surface *src, SDL_Surface *dest)
         {
             for(size_t k = 0; k < 3; k++)
 			{
-                unsigned char pix;
+        Uint32 pixel = get_pixel(src, (int)(i / rx), (int)(j / ry));
+        put_pixel(dest, i, j, pixel);
+                /*unsigned char pix;
                 pix = GetPixelComp32(src, (int)(i / rx), (int)(j / ry), k);
-                PutPixelComp32(dest, i, j, k, pix);
+                PutPixelComp32(dest, i, j, k, pix);*/
 			}
         }
     }
@@ -190,13 +192,13 @@ void letter_grayscale(SDL_Surface *letter_surface, size_t width, size_t height)
 
             pixel = SDL_MapRGB(letter_surface->format, r, r, r);
             put_pixel(letter_surface, i, j, pixel);
-            */
+
             if (r + g - 255 < b)
             {
                 pixel = SDL_MapRGB(letter_surface->format, 0, 0, 0);
                 r = b;
                 g = b;
-            }
+            }*/
             r = 255 - r;
             g = 255 - g;
             b = 255 - b;
@@ -307,6 +309,7 @@ void Segmentation(SDL_Surface *image_surface)
         if (h2)
         {
             drawallcolumn_and_cut(image_surface, width, h1, h2);
+            printf("%s\n", "retour");
             h2 = 0;
         }
 

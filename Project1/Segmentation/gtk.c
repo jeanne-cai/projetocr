@@ -6,8 +6,8 @@
 #include "otsu.h"
 #include "hough.h"
 
-#define IMG_W 500
-#define IMG_H 500
+#define IMG_W 1000
+#define IMG_H 1000
 
 
 // ---- GTK Interface
@@ -62,7 +62,7 @@ void load_file(gchar *file)
         size_t w = image_surface->w;
         size_t h = image_surface->h;
 
-/*        if (w > IMG_W || h > IMG_H)
+        if (w > IMG_W || h > IMG_H)
         {
             if (w > IMG_W)
                 w = IMG_W;
@@ -75,7 +75,7 @@ void load_file(gchar *file)
             gtk_image_set_from_file(GTK_IMAGE(image),
                 "image/image_resized.bmp");
         }
-        else*/
+        else
         gtk_image_set_from_file(GTK_IMAGE(image), filename);
         gtk_window_resize(GTK_WINDOW(window), w, h);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
@@ -149,6 +149,13 @@ void lunch_ocr()
     Segmentation(image_surface);
     SDL_SaveBMP(image_surface, "image/seg_image-contour.bmp");
     load_file("image/seg_image-contour.bmp");
+    GtkWidget* text=gtk_message_dialog_new(GTK_WINDOW(window),
+        GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_INFO,GTK_BUTTONS_CLOSE,
+        "TEXT : %s", "blalblalba\n blabla bla\nsqdhbfhqbdsfjbsdjf sjwbnlijefnkjSBFlkjBJQSBLfnSBlhjbfslfkNJLXlcb ljSB jkFBEk");
+    gtk_window_set_title(GTK_WINDOW(text), "text");
+        gtk_dialog_run(GTK_DIALOG(text));
+        gtk_widget_destroy(text);
 
     // Final image
     SDL_SaveBMP(image_surface, "image/seg_image_ocr.bmp");
