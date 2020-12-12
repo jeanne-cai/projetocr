@@ -178,7 +178,7 @@ void hysteresis_thresholding(double g[], size_t w, size_t h)
 
 // Main : Canny filter
 
-double* canny_edge_detection(double *m, size_t width, size_t height)
+void canny_edge_detection(double *m, size_t width, size_t height)
 {
     double *mGauss = init_matrix(width * height);
     double *mX = init_matrix(width * height);
@@ -230,11 +230,10 @@ double* canny_edge_detection(double *m, size_t width, size_t height)
     // Apply edge tracking by hysteresis
     hysteresis_thresholding(m, width, height);
 
+    free(mGauss);
     free(mX);
     free(mY);
     free(G);
-
-    return mGauss;
 }
 
 
@@ -249,24 +248,24 @@ int Hough_Transform(SDL_Surface *image_surface)
     size_t width = image_surface->w;
     size_t height = image_surface->h;
 
-/*    int RHO = sqrt(width * width + height * height) * 2;
+    int RHO = sqrt(width * width + height * height) * 2;
     int THETA = 180;
 
     double rho = 0, theta_max = 0, f_max = 0;
     double *f = init_matrix(RHO * THETA);
-*/    double *m = init_matrix(width * height);
+    double *m = init_matrix(width * height);
 
     // m : matrix that represents the image
     image_to_matrix(image_surface, m, width, height);
 
     // Apply Canny filter
-    double *mGauss = canny_edge_detection(m, width, height);
-    matrix_to_image(image_surface, width, height, mGauss);
+    canny_edge_detection(m, width, height);
+//    matrix_to_image(image_surface, width, height, m);
 
     // Uses the parametric representation of a line
     // rho : distance perpendicular to the line
     // theta : angle of (x, rho)
-/*    for (size_t x = 1; x < height - 1; x++)
+    for (size_t x = 1; x < height - 1; x++)
     {
         for (size_t y = 1; y < width - 1; y++)
         {
@@ -274,8 +273,8 @@ int Hough_Transform(SDL_Surface *image_surface)
             {
                 for (int theta = 0; theta < THETA; theta++)
                 {
-                    rho = RHO / 2 + x * cos(theta * M_PI / 180) + y * sin(theta * M_PI / 180);
-                    f[(int)(rho * THETA + theta)]++;
+                    rho = y * cos(theta * M_PI / 180) + x * sin(theta * M_PI / 180);
+                    f[(int)(theta * RHO + rho)]++;
                 }
             }
         }
@@ -286,27 +285,22 @@ int Hough_Transform(SDL_Surface *image_surface)
     {
         for (int r = 0; r < RHO; r++)
         {
-            if (f[r * THETA + t] > f_max)
+            if ((int)f[t * RHO + r] > f_max)
             {
-                f_max = f[r * THETA + t];
+                f_max = (int)f[t * RHO + r];
                 theta_max = t;
             }
         }
     }
 
     // -90 <= theta < 90
-//    theta_max -= 90;
+    theta_max -= 90;
 
     free(m);
     free(f);
 
-//    printf("theta_max = %lf\n", theta_max);
-    return theta_max;*/
-
-    free(m);
-    free(mGauss);
-
-    return 0;
+    printf("theta_max = %d\n", (int)theta_max);
+    return (int)theta_max;
 }
 
 /*// Unsharp maskinig 5x5
