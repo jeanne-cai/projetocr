@@ -1,7 +1,6 @@
 #include "sdl_base.h"
 
 
-
 int nb_image = 0;
 
 
