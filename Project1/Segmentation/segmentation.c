@@ -328,7 +328,7 @@ void string_double_capacity(char **string, int *size)
 
 // ---- Segmentation
 
-void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
+void drawallcolumn_and_cut(SDL_Surface *image_surface, SDL_Surface *copy_surface, size_t width,
     size_t h1, size_t h2,Network *network)
 {
     int w1 = 0;
@@ -345,7 +345,7 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
     		char s[20];
             sprintf(s, "image/seg_%d", nb_image++);
 
-    		c = Snap(image_surface, w1 + 1, h1 + 1, w2, h2,
+    		c = Snap(copy_surface, w1 + 1, h1 + 1, w2, h2,
                     strcat(s,".bmp"), network);
             if (index == size - 1)
                 string_double_capacity(&string, &size);
@@ -396,7 +396,7 @@ void WhiteCountouring(SDL_Surface *image_surface, size_t width, size_t height)
 
 // Main : Segmentation
 
-void Segmentation(SDL_Surface *image_surface)
+void Segmentation(SDL_Surface *image_surface,SDL_Surface *copy_surface)
 {
     Network network;
 
@@ -421,7 +421,7 @@ void Segmentation(SDL_Surface *image_surface)
     {
         if (h2)
         {
-            drawallcolumn_and_cut(image_surface, width, h1, h2,&network);
+            drawallcolumn_and_cut(image_surface, copy_surface, width, h1, h2,&network);
             printf("%s\n", " retour");
             h2 = 0;
         }

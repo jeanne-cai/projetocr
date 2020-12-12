@@ -125,7 +125,9 @@ void choose_file()
 void lunch_ocr()
 {
     SDL_Surface *image_surface;
+    SDL_Surface *copy_surface;
     image_surface = IMG_Load(filename);
+    copy_surface = IMG_Load(filename);
 
     // Apply Grayscale
     GrayScale(image_surface);
@@ -144,7 +146,7 @@ void lunch_ocr()
     load_file("image/seg_image-binarized.bmp");
 
     // Apply Segmentation
-    Segmentation(image_surface);
+    Segmentation(image_surface,copy_surface);
     SDL_SaveBMP(image_surface, "image/seg_image-contour.bmp");
     load_file("image/seg_image-contour.bmp");
 
