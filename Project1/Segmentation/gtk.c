@@ -49,6 +49,9 @@ GtkWidget* create_file_chooser_dialog(GtkFileChooserAction action)
 
 void load_file(gchar *file)
 {
+    if (filename[0] == 0)
+        return;
+
     SDL_Surface* image_surface;
     image_surface = IMG_Load(file);
 
@@ -73,8 +76,7 @@ void load_file(gchar *file)
                 "image/image_resized.bmp");
         }
         else
-            gtk_image_set_from_file(GTK_IMAGE(image), filename);
-
+        gtk_image_set_from_file(GTK_IMAGE(image), filename);
         gtk_window_resize(GTK_WINDOW(window), w, h);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     }
@@ -138,24 +140,22 @@ void lunch_ocr()
     load_file("image/seg_image-binarized.bmp");
 
     // Apply Canny and find angle for rotate the image
-//    int angle = Hough_Transform(image_surface);
-//    image_surface = Rotate(image_surface, angle);
-//    SDL_SaveBMP(image_surface, "image/seg_image-canny.bmp");
-//    load_file("image/seg_image-binarized.bmp");
+    // int angle = Hough_Transform(image_surface);
+    // image_surface = Rotate(image_surface, angle);
+    // SDL_SaveBMP(image_surface, "image/seg_image-canny.bmp");
+    // load_file("image/seg_image-binarized.bmp");
 
     // Apply Segmentation
     Segmentation(image_surface);
     SDL_SaveBMP(image_surface, "image/seg_image-contour.bmp");
     load_file("image/seg_image-contour.bmp");
-
-    GtkWidget *text = gtk_message_dialog_new(GTK_WINDOW(window),
-                        GTK_DIALOG_DESTROY_WITH_PARENT,
-                        GTK_MESSAGE_INFO,GTK_BUTTONS_CLOSE,
-                        "TEXT : %s",
-    "blalblalba\n blabla bla\n sqdhbfhqbdsfjbsdjf sjwbnlijefnk jSBFlkjBJQSBLfnSBlhjbfslfkNJLXlcb ljSB jkFBEk");
-    gtk_window_set_title(GTK_WINDOW(text), "Text");
-    gtk_dialog_run(GTK_DIALOG(text));
-    gtk_widget_destroy(text);
+    GtkWidget* text=gtk_message_dialog_new(GTK_WINDOW(window),
+        GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_INFO,GTK_BUTTONS_CLOSE,
+        "TEXT : %s", "blalblalba\n blabla bla\nsqdhbfhqbdsfjbsdjf sjwbnlijefnkjSBFlkjBJQSBLfnSBlhjbfslfkNJLXlcb ljSB jkFBEk");
+    gtk_window_set_title(GTK_WINDOW(text), "text");
+        gtk_dialog_run(GTK_DIALOG(text));
+        gtk_widget_destroy(text);
 
     // Final image
     SDL_SaveBMP(image_surface, "image/seg_image_ocr.bmp");
@@ -175,6 +175,13 @@ void rotate90()
     SDL_FreeSurface(image_surface);
 }
 
+// Lunch the neural network
+
+/*void lunch_neuralnetwork()
+{
+	//TODO
+}*/
+
 
 // Main : GTK Interface
 
@@ -193,6 +200,7 @@ int gtk_init_window(int argc, char **argv)
     GtkWidget* openBMP_button = gtk_button_new_with_label("Open image");
     GtkWidget* lunchOCR_button = gtk_button_new_with_label("Lunch OCR");
     GtkWidget* rotate90_button = gtk_button_new_with_label("Rotate 90°");
+//    GtkWidget* NN_button = gtk_button_new_with_label("Neural Network");
 
     // Window parameter
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
@@ -205,12 +213,16 @@ int gtk_init_window(int argc, char **argv)
     g_signal_connect(lunchOCR_button, "clicked", G_CALLBACK(lunch_ocr), NULL);
     g_signal_connect(rotate90_button, "clicked", G_CALLBACK(rotate90), NULL);
 
+//    g_signal_connect(NN_button, "clicked", G_CALLBACK(lunch_neuralnetwork), NULL);
+
     // Box
     gtk_box_pack_start(GTK_BOX(main_box), box_1, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(main_box), image, FALSE, TRUE, 0);
+    /*A inserer un autre pour afficher le texte*/
     gtk_box_pack_start(GTK_BOX(box_1), openBMP_button, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box_1), lunchOCR_button, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box_1), rotate90_button, FALSE, TRUE, 0);
+//    gtk_box_pack_start(GTK_BOX(box_1), NN_button, FALSE, TRUE, 0);
     gtk_container_add(GTK_CONTAINER(window), main_box);
 
     gtk_widget_show_all(window);
