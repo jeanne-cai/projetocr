@@ -5,7 +5,6 @@
 #include "hough.h"
 #include "network.h"
 
-
 int nb_image = 0;
 
 
@@ -19,7 +18,7 @@ int line_isempty(SDL_Surface *image_surface, size_t width, size_t h_pos)
         Uint32 pixel = get_pixel(image_surface, i, h_pos);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r == 0 && b == 0 && g == 0)
+        if (!r && !b && !g)
             return 0;
     }
     return 1;
@@ -34,12 +33,12 @@ int column_isempty(SDL_Surface *image_surface, size_t w_pos,
         Uint32 pixel = get_pixel(image_surface, w_pos, h);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r == 0 && b == 0 && g == 0)
-//        if (!r && !b && !g)
+        if (!r && !b && !g)
             return 0;
     }
     return 1;
 }
+
 
 // ---- Draw
 
@@ -93,10 +92,10 @@ void Stretch_Nearest(SDL_Surface *src, SDL_Surface *dest)
     {
         for (int j = 0; j < dest->h; j++)
         {
-            for(size_t k = 0; k < 3; k++)
-			{
-        Uint32 pixel = get_pixel(src, (int)(i / rx), (int)(j / ry));
-        put_pixel(dest, i, j, pixel);
+            for (size_t k = 0; k < 3; k++)
+            {
+                Uint32 pixel = get_pixel(src, (int)(i / rx), (int)(j / ry));
+                put_pixel(dest, i, j, pixel);
                 /*unsigned char pix;
                 pix = GetPixelComp32(src, (int)(i / rx), (int)(j / ry), k);
                 PutPixelComp32(dest, i, j, k, pix);*/
@@ -109,7 +108,7 @@ SDL_Surface* Strechblit(SDL_Surface *src, size_t w, size_t h)
 {
     SDL_Surface* img;
 
-    img  = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
+    img = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
     Stretch_Nearest(src, img);
     //Stretch_Linear(src, img);
 
@@ -118,14 +117,9 @@ SDL_Surface* Strechblit(SDL_Surface *src, size_t w, size_t h)
 
 SDL_Surface* resize(SDL_Surface *letter_surface, size_t w, size_t h)
 {
-/*    SDL_Surface* img;
-    img = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
-    Stretch_Nearest(letter_surface, img);
-    //Stretch_Linear(letter_surface, img);
-
-    return img;*/
     return Strechblit(letter_surface, w, h);
 }
+
 
 // ---- Letter
 
@@ -238,20 +232,23 @@ char Snap(SDL_Surface *image_surface, size_t x, size_t y,
     nletter_surface = center(letter_surface, w);
     letter_grayscale(nletter_surface, 28, 28);
 
-	SDL_SaveBMP(nletter_surface, filename);
+    SDL_SaveBMP(nletter_surface, filename);
     
     image_to_matrix(nletter_surface, matrix_image, 28, 28);
-    c=arr_to_char(matrix_image,network);
-    printf("%c\n",c);
-    for(size_t j=0; j<28;j++){
-            for(size_t k=0; k<28;k++){
-                float f = matrix_image[j*28+k]/255;
-                if(f>0.1){
-                    printf("\033[41m");
-                }
-                printf("%.1f \033[00m",f);
+    c = arr_to_char(matrix_image, network);
+    printf("%c\n", c);
+    for (size_t j = 0; j < 28; j++)
+    {
+        for (size_t k = 0; k < 28; k++)
+        {
+            float f = matrix_image[j * 28 + k] / 255;
+            if (f > 0.1)
+            {
+                printf("\033[41m");
             }
-            printf("\n");
+            printf("%.1f \033[00m",f);
+        }
+        printf("\n");
     }
 
     SDL_FreeSurface(letter_surface);
@@ -260,10 +257,13 @@ char Snap(SDL_Surface *image_surface, size_t x, size_t y,
     return c;
 }
 
-void string_double_capacity(char **string,int *size) {
+void string_double_capacity(char **string, int *size)
+{
     *size *= 2;
     *string = realloc(*string, *size * sizeof(char));
 }
+
+
 // ---- Segmentation
 
 void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
@@ -273,9 +273,8 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
     int w2 = 0;
     
     char c;
-    int index=0,size=1;
+    int index = 0, size = 1;
     char *string = malloc(sizeof(char));
-
 
 	for (size_t w = 0; w < width; w++)
     {
@@ -283,15 +282,16 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
     	{
     		char s[20];
             sprintf(s, "image/seg_%d", nb_image++);
-    		c=Snap(image_surface, w1 + 1, h1 + 1, w2, h2, strcat(s,".bmp"),network);
-            if(index==size-1)
-                string_double_capacity(&string,&size);
-            string[index]=c;
+
+    		c = Snap(image_surface, w1 + 1, h1 + 1, w2, h2,
+                    strcat(s,".bmp"), network);
+            if (index == size - 1)
+                string_double_capacity(&string, &size);
+            string[index] = c;
             index++;
 
     		w2 = 0;
     	}
-
 
         if (!column_isempty(image_surface, w, h1, h2))
         {
@@ -308,22 +308,21 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
             }
         }
     }
-    string[index]='\0';
-    printf("\n\nstring :\n%s\n",string);
+
+    string[index] = '\0';
+    printf("\n\nstring :\n%s\n", string);
 }
 
-// Border Black
-void BlackCountouring(SDL_Surface *image_surface, size_t width, size_t height)
+// Border White
+void WhiteCountouring(SDL_Surface *image_surface, size_t width, size_t height)
 {
     Uint32 pixel;
-
     for (size_t i = 0; i < width; i++)
     {
         pixel = SDL_MapRGB(image_surface->format, 255, 255, 255);
         put_pixel(image_surface, i, 0, pixel);
         put_pixel(image_surface, i, height - 1, pixel);
     }
-
     for (size_t j = 0; j < height; j++)
     {
         pixel = SDL_MapRGB(image_surface->format, 255, 255, 255);
@@ -332,33 +331,36 @@ void BlackCountouring(SDL_Surface *image_surface, size_t width, size_t height)
     }
 }
 
+
 // Main : Segmentation
 
 void Segmentation(SDL_Surface *image_surface)
 {
     Network network;
+
     size_t width = image_surface->w;
     size_t height = image_surface->h;
 
-    int h1 = 0;
-    int h2 = 0;
+    int h1 = 0, h2 = 0;
+
     size_t nbCorrect;
     Dataset data_set;
-    initialiseDataSet(&data_set,"dataSetfile.csv");
+    initialiseDataSet(&data_set, "dataSetfile.csv");
 
-    load_network(&network,"neuralnet82.2.net");
-    nbCorrect=evaluateNetwork(&network, &data_set);
-    printf("\n %ld éléments reconnus correct sur %ld, %.3f\n", nbCorrect,data_set.size, (float)nbCorrect/data_set.size);
-   // exit(1);
+    load_network(&network, "neuralnet82.2.net");
+    nbCorrect = evaluateNetwork(&network, &data_set);
+    printf("\n %ld éléments reconnus correct sur %ld, %.3f\n",
+            nbCorrect,data_set.size, (float)nbCorrect/data_set.size);
+    // exit(1);
 
-    BlackCountouring(image_surface, width, height);
+    WhiteCountouring(image_surface, width, height);
 
     for (size_t j = 0; j < height; j++)
     {
         if (h2)
         {
             drawallcolumn_and_cut(image_surface, width, h1, h2,&network);
-            printf("%s\n", "retour");
+            printf("%s\n", " retour");
             h2 = 0;
         }
 
