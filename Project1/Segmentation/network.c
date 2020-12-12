@@ -31,10 +31,10 @@ int init_network(Network *network,int nbLayer, int nbNeuronPerLayer[]){
 	network->arrLayer[0] = new_layer(nbNeuronPerLayer[0], NULL);
 	//initialisation des layers
 	for(int i=1; i<nbLayer;i++){
-		network->arrLayer[i] = 
+		network->arrLayer[i] =
 		new_layer(nbNeuronPerLayer[i], &(network->arrLayer[i-1]));
 	}
-	
+
 	network->inputLayer = &network->arrLayer[0];
 	network->outputLayer = &network->arrLayer[nbLayer-1];
 
@@ -52,15 +52,15 @@ float sigmoidPrime(float z)
 }
 void feed_forward(Network *network, float *inputs)
 {
-	int nbLayer = network->nbLayer,nbNeuron,nbOldNeuron; 
+	int nbLayer = network->nbLayer,nbNeuron,nbOldNeuron;
 	float z;
-	
+
 	for(int i=0; i<network->arrLayer[0].nbNeuron;i++){
 		network->arrLayer[0].valuesNeurons[i] = inputs[i];
 	}
-	
+
 	for(int i=1; i<nbLayer; i++){
-		
+
 		nbNeuron=network->arrLayer[i].nbNeuron;
 		nbOldNeuron=network->arrLayer[i-1].nbNeuron;
 
@@ -68,13 +68,13 @@ void feed_forward(Network *network, float *inputs)
 			network->arrLayer[i].weights,
 			network->arrLayer[i-1].valuesNeurons,
 			network->arrLayer[i].valuesNeurons);
-		
+
 		somme_arrays(nbNeuron,
 			network->arrLayer[i].valuesBiases,
 			network->arrLayer[i].valuesNeurons,
 			network->arrLayer[i].valuesNeurons);
-	
-		
+
+
 		for(int j=0; j<network->arrLayer[i].nbNeuron; j++){
 			z=network->arrLayer[i].valuesNeurons[j];
 			network->arrLayer[i].z[j]=z;
@@ -94,19 +94,19 @@ void backpropagation(Network *network, float *dataInput, float *expectedResult)
 	Layer *previousLayer;
 	int nbNeuron;
 	int nbNeuronPreviousLayer;
-	
+
 	// //init cost
 	Layer *outputLayer = &network->arrLayer[network->nbLayer-1];
 	int nbNeuronOutputLayer = outputLayer->nbNeuron;
 
 	for (int i = 0; i < nbNeuronOutputLayer; ++i)
 	{
-		outputLayer->cost[i] = 
-		(outputLayer->valuesNeurons[i]-expectedResult[i]);								
+		outputLayer->cost[i] =
+		(outputLayer->valuesNeurons[i]-expectedResult[i]);
 	}
 
 	//Backpropagation
-	for(int i=network->nbLayer-1; i>0; i--){		
+	for(int i=network->nbLayer-1; i>0; i--){
 		currentLayer = &network->arrLayer[i];
 		previousLayer=currentLayer->previousLayer;
 		nbNeuron = currentLayer->nbNeuron;
@@ -115,7 +115,7 @@ void backpropagation(Network *network, float *dataInput, float *expectedResult)
 		for(int j=0;j<nbNeuron;j++){
 			currentLayer->deltaBiases[j] += currentLayer->cost[j];
 		}
-		
+
 		product_col_line(nbNeuron, nbNeuronPreviousLayer,
 						currentLayer->cost, previousLayer->valuesNeurons,
 						currentLayer->deltaWeights);
@@ -157,7 +157,7 @@ void sgd(Dataset *training_data, size_t epochs, size_t mini_batch_size, float le
     }
 }
 
-void train_batch(Network *network, float **dataInput, float **expectedResult, 
+void train_batch(Network *network, float **dataInput, float **expectedResult,
 	float learningRate, int nbInputs)
 {
 		for(int j=0;j<nbInputs;j++){
@@ -175,13 +175,13 @@ void applyModif(Network *network, float learningRate, int nbInputs)
 		layer=&network->arrLayer[i];
 		for (int j = 0; j < layer->nbNeuron; ++j)
 		{
-			layer->valuesBiases[j] -= learningRate * 
+			layer->valuesBiases[j] -= learningRate *
 			layer->deltaBiases[j] / nbInputs;
 			layer->deltaBiases[j] = 0.f;
 
 			for (int k = 0; k < layer->previousLayer->nbNeuron; ++k)
 			{
-				layer->weights[j][k] -= learningRate * 
+				layer->weights[j][k] -= learningRate *
 				layer->deltaWeights[j][k] / nbInputs;
 				layer->deltaWeights[j][k] = 0.f;
 			}
@@ -193,7 +193,7 @@ char getOutputChar(float tab[], size_t sizeMax)
 {
 	int indexMax=0;
 	float max=tab[0],inter;
-	
+
 	for(size_t j=1;j<sizeMax;j++)
 	{
 		inter=tab[j];
@@ -216,7 +216,7 @@ size_t evaluateNetwork(Network *network, Dataset *dataset){
 		cresult=getOutputChar(network->outputLayer->valuesNeurons,sizeMax);
 		if(cresult==ctarget)
 				nbCorrect++;
-	}	
+	}
 	return nbCorrect;
 }
 
@@ -238,7 +238,7 @@ void write_network(Network network,FILE **file)
 	//write the number of neurons per layer
 	for(int i=0; i<network.nbLayer;i++)
 		fprintf(*file,"%d\n",network.arrLayer[i].nbNeuron);
-	
+
 	//write the biais for each neurons of each layers
 	for(int i=1; i<network.nbLayer;i++)
 	{
@@ -267,8 +267,8 @@ void save_network(Network network)
 	char nameoffile[100];
 	printf("Please enter a name for your file : ");
 	secuScanf("%s",nameoffile);
-	
-	
+
+
 	//open a new folder
 	FILE* file=NULL;
 	file =fopen(nameoffile,"a");
@@ -279,7 +279,7 @@ void save_network(Network network)
 	}
 	//write in the file
 	write_network(network,&file);
-	
+
 	//free memory
 	fclose(file);
 
@@ -289,21 +289,21 @@ void read_network(Network *network,FILE **file)
 {
 	int nbLayer;
 	int retour;
-	
+
 	//write the number of layer
 	retour=fscanf(*file,"%d\n",&nbLayer);
-	if(retour==0){
+	if(retour==-1){
 		printf("read network: erreur\n");
 		exit(-1);
 	}
-	
+
 	//Dynamic allocation
 	int *arrLayer=malloc(nbLayer*sizeof(int));
-	
+
 	//write the number of neurons per layer
 	for(int i=0; i<nbLayer;i++){
 		retour=fscanf(*file,"%d\n",&(arrLayer[i]));
-		if(retour==0){
+		if(retour==-1){
 			printf("read network: erreur\n");
 			exit(-1);
 		}
@@ -311,14 +311,14 @@ void read_network(Network *network,FILE **file)
 
 	//initialisation of network
 	init_network(network, nbLayer, arrLayer);
-	
+
 	//write the biais for each neurons of each layers
 	for(int i=1; i<network->nbLayer;i++)
 	{
 		for(int j=0;j<network->arrLayer[i].nbNeuron;j++)
 		{
 			retour=fscanf(*file,"%f\n",&(network->arrLayer[i].valuesBiases[j]));
-			if(retour==0){
+			if(retour==-1){
 				printf("read network: erreur\n");
 				exit(-1);
 			}
@@ -333,7 +333,7 @@ void read_network(Network *network,FILE **file)
 			for(int k=0;k<network->arrLayer[i-1].nbNeuron;k++)
 			{
 				retour=fscanf(*file,"%f\n",&(network->arrLayer[i].weights[j][k]));
-				if(retour==0){
+				if(retour==-1){
 					printf("read network: erreur\n");
 					exit(-1);
 				}
@@ -343,7 +343,7 @@ void read_network(Network *network,FILE **file)
 }
 void load_network(Network *network,char *nameoffile)
 {
-	
+
 	//open the folder
 	FILE* file=NULL;
 	file =fopen(nameoffile,"r");
@@ -355,7 +355,7 @@ void load_network(Network *network,char *nameoffile)
 
 	//write in the file
 	read_network(network,&file);
-	
+
 	//free memory
 	fclose(file);
 }
@@ -376,16 +376,16 @@ void free_network(Network *network){
 	for(int k=0; k<network.arrLayer[0].nbNeuron; k++)
 	{
 				printf("N%d: %f  \n",k,network.arrLayer[0].valuesNeurons[k]);
-			
+
 	}
-	
+
 	//info autres layers
 	for(int j=1; j<network.nbLayer; j++)
 	{
 		printf("--------------------------------------------------------\n\n");
 		printf("COUCHE %d\n\nNeurones: %d\nBiais:\n"
 			,j,network.arrLayer[j].nbNeuron);
-		
+
 		for(int k=0; k<network.arrLayer[j].nbNeuron; k++)
 		{
 			printf("N%d: %f\n",k, network.arrLayer[j].valuesBiases[k]);
@@ -403,13 +403,13 @@ void free_network(Network *network){
 		for(int k=0; k<network.arrLayer[j].nbNeuron; k++)
 		{
 				printf("N%d: %f  \n",k,network.arrLayer[j].valuesNeurons[k]);
-			
+
 		}
 		printf("\n\nValeurs Neurones :\n");
 		for(int k=0; k<network.arrLayer[j].nbNeuron; k++)
 		{
 				printf("N%d: %f  \n",k,network.arrLayer[j].valuesNeurons[k]);
-			
+
 		}
 
 		printf("\n\nValeurs delta biais :\n");

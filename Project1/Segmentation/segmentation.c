@@ -18,7 +18,7 @@ int line_isempty(SDL_Surface *image_surface, size_t width, size_t h_pos)
         Uint32 pixel = get_pixel(image_surface, i, h_pos);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r < 127)
+        if (r < 210)
             return 0;
     }
     return 1;
@@ -33,7 +33,7 @@ int column_isempty(SDL_Surface *image_surface, size_t w_pos,
         Uint32 pixel = get_pixel(image_surface, w_pos, h);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r < 127)
+        if (r < 210)
             return 0;
     }
     return 1;
@@ -231,8 +231,8 @@ SDL_Surface* cut(SDL_Surface *letter_surface)
   size_t minw=Minw(letter_surface,w,h);
   size_t maxw=Maxw(letter_surface,w,h);
 
-  w = maxw - minw;
-  h = maxh - minh;
+  w = (maxw - minw);
+  h = (maxh - minh)+1;
     SDL_Surface *nletter_surface;
     SDL_Rect position;
 
