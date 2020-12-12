@@ -88,6 +88,8 @@ void Stretch_Nearest(SDL_Surface *src, SDL_Surface *dest)
     {
         for (int j = 0; j < dest->h; j++)
         {
+            for(size_t k = 0; k < 3; k++)
+			{
         Uint32 pixel = get_pixel(src, (int)(i / rx), (int)(j / ry));
         put_pixel(dest, i, j, pixel);
                 /*unsigned char pix;
@@ -334,10 +336,29 @@ void Snap(SDL_Surface *image_surface, size_t x, size_t y,
 
 	SDL_SaveBMP(letter_surface, filename);
 
+	SDL_SaveBMP(nletter_surface, filename);
+    
+    image_to_matrix(nletter_surface, matrix_image, 28, 28);
+    c=arr_to_char(matrix_image,network);
+    printf("%c\n",c);
+    for(size_t j=0; j<28;j++){
+            for(size_t k=0; k<28;k++){
+                float f = matrix_image[j*28+k]/255;
+                if(f>0.1){
+                    printf("\033[41m");
+                }
+                printf("%.1f \033[00m",f);
+            }
+            printf("\n");
+    }
+
     SDL_FreeSurface(letter_surface);
 }
 
-
+void string_double_capacity(char **string,int *size) {
+    *size *= 2;
+    *string = realloc(*string, *size * sizeof(char));
+}
 // ---- Segmentation
 
 void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
@@ -345,6 +366,11 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
 {
     int w1 = 0;
     int w2 = 0;
+    
+    char c;
+    int index=0,size=1;
+    char *string = malloc(sizeof(char));
+
 
 	for (size_t w = 0; w < width; w++)
     {
@@ -352,9 +378,15 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
     	{
     		char s[20];
             sprintf(s, "image/seg_%d", nb_image++);
-    		Snap(image_surface, w1 + 1, h1 + 1, w2, h2, strcat(s,".bmp"));
+    		c=Snap(image_surface, w1 + 1, h1 + 1, w2, h2, strcat(s,".bmp"),network);
+            if(index==size-1)
+                string_double_capacity(&string,&size);
+            string[index]=c;
+            index++;
+
     		w2 = 0;
     	}
+
 
         if (!column_isempty(image_surface, w, h1, h2))
         {
@@ -371,6 +403,8 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
             }
         }
     }
+    string[index]='\0';
+    printf("\n\nstring :\n%s\n",string);
 }
 
 // Border Black
@@ -397,11 +431,20 @@ void BlackCountouring(SDL_Surface *image_surface, size_t width, size_t height)
 
 void Segmentation(SDL_Surface *image_surface)
 {
+    Network network;
     size_t width = image_surface->w;
     size_t height = image_surface->h;
 
     int h1 = 0;
     int h2 = 0;
+    size_t nbCorrect;
+    Dataset data_set;
+    initialiseDataSet(&data_set,"dataSetfile.csv");
+
+    load_network(&network,"neuralnet82.2.net");
+    nbCorrect=evaluateNetwork(&network, &data_set);
+    printf("\n %ld éléments reconnus correct sur %ld, %.3f\n", nbCorrect,data_set.size, (float)nbCorrect/data_set.size);
+   // exit(1);
 
     BlackCountouring(image_surface, width, height);
 
@@ -409,7 +452,7 @@ void Segmentation(SDL_Surface *image_surface)
     {
         if (h2)
         {
-            drawallcolumn_and_cut(image_surface, width, h1, h2);
+            drawallcolumn_and_cut(image_surface, width, h1, h2,&network);
             printf("%s\n", "retour");
             h2 = 0;
         }
