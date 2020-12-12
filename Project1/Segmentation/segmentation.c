@@ -328,11 +328,57 @@ void string_double_capacity(char **string, int *size)
 
 // ---- Segmentation
 
+int find_space(SDL_Surface *image_surface, size_t width,
+    size_t h1, size_t h2)
+{
+    int w1 = 0;
+    int w2 = 0;
+    int w3 = 0;
+
+    int ecart = -1;
+    int space_min = 1000;
+    int space_max = 0;
+
+    for (size_t w = 0; w < width; w++)
+    {
+        if (w2)
+        {
+            if (w3)
+            {
+                ecart = w1 - w3;
+                if (ecart > space_max)
+                    space_max = ecart;
+                if (ecart < space_min && ecart != 0)
+                    space_min = ecart;
+            }
+            w3 = w2;
+            w2 = 0;
+        }
+
+        if (!column_isempty(image_surface, w, h1, h2))
+        {
+            if (w - 1 > 0 && column_isempty(image_surface, w - 1, h1, h2))
+                w1 = w - 1;
+
+            if (w + 1 < width && column_isempty(image_surface, w + 1, h1, h2))
+                w2 = w + 1;
+        }
+    }
+
+    if (space_max - space_min > 5)
+        return space_min;
+    return -1;
+}
+
 void drawallcolumn_and_cut(SDL_Surface *image_surface, SDL_Surface *copy_surface, size_t width,
     size_t h1, size_t h2,Network *network)
 {
     int w1 = 0;
     int w2 = 0;
+
+    int w3 = 0;
+    int space = find_space(image_surface, width, h1, h2);
+    int ecart = 0;
 
     char c;
     int index = 0, size = 1;
@@ -342,17 +388,33 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, SDL_Surface *copy_surface
     {
     	if (w2)
     	{
-    		char s[20];
+            if (w3)
+            {
+                if (space > 0)
+                {
+                    ecart = w1 - w3;
+                    if (ecart > space * 2)
+                    {
+                        c = ' ';
+                        if (index == size - 1)
+                            string_double_capacity(&string, &size);
+                        string[index] = c;
+                        index++;
+                    }
+                }
+            }
+            char s[20];
             sprintf(s, "image/seg_%d", nb_image++);
 
-    		c = Snap(copy_surface, w1 + 1, h1 + 1, w2, h2,
-                    strcat(s,".bmp"), network);
+            c = Snap(copy_surface, w1 + 1, h1 + 1, w2, h2,
+                strcat(s,".bmp"), network);
             if (index == size - 1)
                 string_double_capacity(&string, &size);
             string[index] = c;
             index++;
 
-    		w2 = 0;
+            w3 = w2;
+            w2 = 0;
     	}
 
         if (!column_isempty(image_surface, w, h1, h2))
