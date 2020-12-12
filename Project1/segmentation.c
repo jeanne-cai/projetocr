@@ -18,7 +18,7 @@ int line_isempty(SDL_Surface *image_surface, size_t width, size_t h_pos)
         Uint32 pixel = get_pixel(image_surface, i, h_pos);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r < 127)
+        if (r < 200)
             return 0;
     }
     return 1;
@@ -33,7 +33,7 @@ int column_isempty(SDL_Surface *image_surface, size_t w_pos,
         Uint32 pixel = get_pixel(image_surface, w_pos, h);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (r < 127)
+        if (r < 200)
             return 0;
     }
     return 1;
@@ -63,6 +63,24 @@ void drawcolumn(SDL_Surface *image_surface, size_t w_pos,
 
 
 // ---- Resize
+
+// Get the pixel x, y of the surface "surface", the component c (3 components RBG)
+unsigned char GetPixelComp32(SDL_Surface* surface,int x,int y,int c)
+{
+    unsigned char *p;
+    p = ((unsigned char*)surface->pixels) + y * surface->pitch + x * 4;
+    return p[c];
+}
+
+// Write the component c (3 component RGB) to the pixel x, y of the surface "surface"
+void PutPixelComp32(SDL_Surface* surface, size_t x, size_t y,
+    size_t c, unsigned char val)
+{
+    unsigned char *p;
+    p = ((unsigned char*)surface->pixels) + y * surface->pitch + x * 4;
+    p[c] = val;
+}
+
 void Stretch_Nearest(SDL_Surface *src, SDL_Surface *dest)
 {
     double rx, ry;
@@ -74,8 +92,14 @@ void Stretch_Nearest(SDL_Surface *src, SDL_Surface *dest)
     {
         for (int j = 0; j < dest->h; j++)
         {
+            for (size_t k = 0; k < 3; k++)
+            {
                 Uint32 pixel = get_pixel(src, (int)(i / rx), (int)(j / ry));
                 put_pixel(dest, i, j, pixel);
+                /*unsigned char pix;
+                pix = GetPixelComp32(src, (int)(i / rx), (int)(j / ry), k);
+                PutPixelComp32(dest, i, j, k, pix);*/
+			}
         }
     }
 }
@@ -86,6 +110,7 @@ SDL_Surface* Strechblit(SDL_Surface *src, size_t w, size_t h)
 
     img = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
     Stretch_Nearest(src, img);
+    //Stretch_Linear(src, img);
 
     return img;
 }
@@ -98,156 +123,54 @@ SDL_Surface* resize(SDL_Surface *letter_surface, size_t w, size_t h)
 
 // ---- Letter
 
-SDL_Surface* Wedge(SDL_Surface *letter_surface, size_t addw, size_t nh)
+SDL_Surface* edge(SDL_Surface *letter_surface, size_t addw)
 {
     SDL_Surface* dest;
     size_t x = 0;
-    size_t w=letter_surface->w;
-    dest = SDL_CreateRGBSurface(SDL_SWSURFACE, 28, nh, 32, 255, 255, 255, 0);
-    for (size_t i = 0; i < 28; i++)
-    {
-        for (size_t j = 0; j < nh; j++)
-        {
-            if (i >= addw && i<28-addw-1)
-            {
-                Uint32 pixel = get_pixel(letter_surface, x, j);
-                put_pixel(dest, i, j, pixel);
-            }
-            else
-            {
-                Uint32 pixel = SDL_MapRGB(dest->format, 255, 255, 255);
-                put_pixel(dest, i, j, pixel);
-            }
-        }
 
-        if (i >= addw && x<w){
-          x++;
-        }
-    }
-    return dest;
-}
-
-SDL_Surface* Hedge(SDL_Surface *letter_surface, size_t addh, size_t nw)
-{
-    SDL_Surface* dest;
-    size_t y = 0;
-    size_t h=letter_surface->h;
     dest = SDL_CreateRGBSurface(SDL_SWSURFACE, 28, 28, 32, 255, 255, 255, 0);
-    for (size_t i = 0; i < nw; i++)
+    for (size_t i = 0; i < 28; i++)
     {
         for (size_t j = 0; j < 28; j++)
         {
-            if (j >= addh && y<h)
+            if (i >= addw && i < 28 - addw - 1)
             {
-                    Uint32 pixel = get_pixel(letter_surface, i, y);
+                for (size_t k = 0; k < 3; k++)
+                {
+                    Uint32 pixel = get_pixel(letter_surface, x, j);
                     put_pixel(dest, i, j, pixel);
                     /*unsigned char pix;
                     pix = GetPixelComp32(letter_surface, x, j, k);
                     PutPixelComp32(dest, i, j, k, pix);*/
-                    y++;
+                }
             }
             else
             {
-                Uint32 pixel = SDL_MapRGB(dest->format, 255, 255, 255);
+                Uint32 pixel = get_pixel(dest, i, j);
+                pixel = SDL_MapRGB(dest->format, 255, 255, 255);
                 put_pixel(dest, i, j, pixel);
             }
         }
-        y=0;
+
+        if (i >= addw && i < 28 - addw - 1)
+            x++;
     }
     return dest;
 }
 
-SDL_Surface* center(SDL_Surface *letter_surface)
+SDL_Surface* center(SDL_Surface *letter_surface, size_t w)
 {
-  size_t w=letter_surface->w;
-  size_t h=letter_surface->h;
-  //rx = dest->w * 1.0 / src->w;
-  //ry = dest->h * 1.0 / src->h;
-  if(w>h){
-    double dnh =  h * 1.0 / w;
-    printf("%lu\n", w);
-    printf("%lu\n", h);
-    printf("%f\n", dnh);
-    int nh=(int) (dnh*26);
-    letter_surface = resize(letter_surface, 26, nh);
-    printf("%s\n", "oui");
-    letter_surface = Wedge(letter_surface, 1,nh);
-    return Hedge(letter_surface, (28 - nh)/2, 28);
-  }
-  else
-  {
-    double dnw = w * 1.0 / h;
-    printf("%f\n", dnw);
-    int nw=(int) (dnw*26);
-    letter_surface = resize(letter_surface,nw, 26);
-    printf("%s\n", "ui");
-    letter_surface = Hedge(letter_surface, 1,nw);
-    return Wedge(letter_surface, (28-nw)/2,28);
-  }
-}
-
-size_t Minh(SDL_Surface *letter_surface, size_t w,size_t h)
-{
-  for (size_t i = 0; i < h; i++){
-    if (!line_isempty(letter_surface,w,i)){
-      return i;
+    if (w > 28)
+    {
+        letter_surface = resize(letter_surface, 26, 28);
+        return edge(letter_surface, 1);
     }
-  }
-  return h;
-}
-size_t Minw(SDL_Surface *letter_surface, size_t w,size_t h)
-{
-  for (size_t i = 0; i < w; i++){
-    if (!column_isempty(letter_surface,i,0,h)){
-      return i;
+    else
+    {
+        letter_surface = resize(letter_surface, w, 28);
+        return edge(letter_surface, (28 - w) / 2);
     }
-  }
-  return w;
 }
-size_t Maxh(SDL_Surface *letter_surface, size_t w,size_t h)
-{
-  for (size_t i = h-1; 0 < i; i--){
-    if (!line_isempty(letter_surface,w,i)){
-      return i;
-    }
-  }
-  return 0;
-}
-size_t Maxw(SDL_Surface *letter_surface, size_t w,size_t h)
-{
-  for (size_t i = w; 0 < i; i--){
-    if (!column_isempty(letter_surface,i,0,h)){
-      return i;
-    }
-  }
-  return 0;
-}
-SDL_Surface* cut(SDL_Surface *letter_surface)
-{
-  size_t w = letter_surface->w;
-  size_t h = letter_surface->h;
-  size_t minh=Minh(letter_surface,w,h);
-  size_t maxh=Maxh(letter_surface,w,h);
-  size_t minw=Minw(letter_surface,w,h);
-  size_t maxw=Maxw(letter_surface,w,h);
-
-  w = maxw - minw;
-  h = maxh - minh;
-    SDL_Surface *nletter_surface;
-    SDL_Rect position;
-
-    nletter_surface = SDL_CreateRGBSurface(SDL_HWSURFACE, w, h, 32,
-                        255, 255, 255, 0);
-	position.x = minw;
-	position.y = minh;
-	position.w = w;
-	position.h = h;
-
-	SDL_BlitSurface(letter_surface, &position, nletter_surface, NULL);
-  return nletter_surface;
-}
-
-//------Snap-------------
 
 // Change letter in white et backgroung in black
 void letter_grayscale(SDL_Surface *letter_surface, size_t width, size_t height)
@@ -260,6 +183,21 @@ void letter_grayscale(SDL_Surface *letter_surface, size_t width, size_t height)
         {
             Uint32 pixel = get_pixel(letter_surface, i, j);
             SDL_GetRGB(pixel, letter_surface->format, &r, &g, &b);
+/*
+            if (r == 255)
+                r = 0;
+            else
+                r = 255;
+
+            pixel = SDL_MapRGB(letter_surface->format, r, r, r);
+            put_pixel(letter_surface, i, j, pixel);
+
+            if (r + g - 255 < b)
+            {
+                pixel = SDL_MapRGB(letter_surface->format, 0, 0, 0);
+                r = b;
+                g = b;
+            }*/
             r = 255 - r;
             g = 255 - g;
             b = 255 - b;
@@ -276,7 +214,7 @@ char Snap(SDL_Surface *image_surface, size_t x, size_t y,
     size_t h = y1 - y;
 
 	SDL_Surface *letter_surface;
-
+    SDL_Surface *nletter_surface;
     SDL_Rect position;
 
     double matrix_image[784];
@@ -291,13 +229,12 @@ char Snap(SDL_Surface *image_surface, size_t x, size_t y,
 
 	SDL_BlitSurface(image_surface, &position, letter_surface, NULL);
 
-  letter_surface =cut(letter_surface);
-  letter_surface = center(letter_surface);
-  letter_grayscale(letter_surface, 28, 28);
+    nletter_surface = center(letter_surface, w);
+    letter_grayscale(nletter_surface, 28, 28);
 
-    SDL_SaveBMP(letter_surface, filename);
-
-    image_to_matrix(letter_surface, matrix_image, 28, 28);
+    SDL_SaveBMP(nletter_surface, filename);
+    
+    image_to_matrix(nletter_surface, matrix_image, 28, 28);
     c = arr_to_char(matrix_image, network);
     printf("%c\n", c);
     for (size_t j = 0; j < 28; j++)
@@ -315,6 +252,7 @@ char Snap(SDL_Surface *image_surface, size_t x, size_t y,
     }
 
     SDL_FreeSurface(letter_surface);
+    SDL_FreeSurface(nletter_surface);
 
     return c;
 }
@@ -333,7 +271,7 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, size_t width,
 {
     int w1 = 0;
     int w2 = 0;
-
+    
     char c;
     int index = 0, size = 1;
     char *string = malloc(sizeof(char));

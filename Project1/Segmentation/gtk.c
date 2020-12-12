@@ -14,7 +14,7 @@
 
 GtkWidget *window;
 GtkWidget *image;
-gchar *filename = "image/image_test0.jpg";
+gchar *filename = "image/im_ocr.png";
 
 
 // ---- Tools dialog
