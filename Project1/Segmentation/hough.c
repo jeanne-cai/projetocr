@@ -178,7 +178,7 @@ void hysteresis_thresholding(double g[], size_t w, size_t h)
 
 // Main : Canny filter
 
-void canny_edge_detection(double *m, size_t width, size_t height)
+double* canny_edge_detection(double *m, size_t width, size_t height)
 {
     double *mGauss = init_matrix(width * height);
     double *mX = init_matrix(width * height);
@@ -230,10 +230,11 @@ void canny_edge_detection(double *m, size_t width, size_t height)
     // Apply edge tracking by hysteresis
     hysteresis_thresholding(m, width, height);
 
-    free(mGauss);
     free(mX);
     free(mY);
     free(G);
+
+    return mGauss;
 }
 
 
@@ -248,24 +249,24 @@ int Hough_Transform(SDL_Surface *image_surface)
     size_t width = image_surface->w;
     size_t height = image_surface->h;
 
-    int RHO = sqrt(width * width + height * height) * 2;
+/*    int RHO = sqrt(width * width + height * height) * 2;
     int THETA = 180;
 
     double rho = 0, theta_max = 0, f_max = 0;
     double *f = init_matrix(RHO * THETA);
-    double *m = init_matrix(width * height);
+*/    double *m = init_matrix(width * height);
 
     // m : matrix that represents the image
     image_to_matrix(image_surface, m, width, height);
 
     // Apply Canny filter
-    canny_edge_detection(m, width, height);
-//    matrix_to_image(image_surface, width, height, m);
+    double *mGauss = canny_edge_detection(m, width, height);
+    matrix_to_image(image_surface, width, height, mGauss);
 
     // Uses the parametric representation of a line
     // rho : distance perpendicular to the line
     // theta : angle of (x, rho)
-    for (size_t x = 1; x < height - 1; x++)
+/*    for (size_t x = 1; x < height - 1; x++)
     {
         for (size_t y = 1; y < width - 1; y++)
         {
@@ -300,8 +301,39 @@ int Hough_Transform(SDL_Surface *image_surface)
     free(f);
 
 //    printf("theta_max = %lf\n", theta_max);
-    return theta_max;
+    return theta_max;*/
+
+    free(m);
+    free(mGauss);
+
+    return 0;
 }
+
+/*// Unsharp maskinig 5x5
+void Unsharp(SDL_surface *image_surface)
+{
+    double *m = init_matrix(width * height);
+    double *m_final = init_matrix(width * height);
+
+    double M =
+    {
+        1, 4, 6, 4, 1,
+        4, 16, 24, 16, 4,
+        6, 24, -476, 24, 6,
+        4, 16, 24, 16, 4,
+        1, 4, 6, 4, 1
+    };
+
+    for (size_t i = 0; i < 25; i++)
+        M[i] = M[i] * (-1 / 256);
+
+    image_to_matrix(image_surface, m, width, height);
+    convolution(m, M, width, height, 5, 5, m_final);
+    matrix_to_image(image_surface, width, height, m_final);
+
+    free(m_final);
+    free(m);
+}*/
 
 // ---- Rotation
 

@@ -18,7 +18,7 @@ int line_isempty(SDL_Surface *image_surface, size_t width, size_t h_pos)
         Uint32 pixel = get_pixel(image_surface, i, h_pos);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (!r && !b && !g)
+        if (r < 127)
             return 0;
     }
     return 1;
@@ -33,7 +33,7 @@ int column_isempty(SDL_Surface *image_surface, size_t w_pos,
         Uint32 pixel = get_pixel(image_surface, w_pos, h);
         SDL_GetRGB(pixel, image_surface->format, &r, &g, &b);
 
-        if (!r && !b && !g)
+        if (r < 127)
             return 0;
     }
     return 1;

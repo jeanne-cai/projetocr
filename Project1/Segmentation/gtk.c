@@ -133,15 +133,15 @@ void lunch_ocr()
     load_file("image/seg_image-grayscale.bmp");
 
     // Apply Binarisation
-//    Otsu(image_surface);
-//    SDL_SaveBMP(image_surface, "image/seg_image-binarized.bmp");
-//    load_file("image/seg_image-binarized.bmp");
+    Otsu(image_surface);
+    SDL_SaveBMP(image_surface, "image/seg_image-binarized.bmp");
+    load_file("image/seg_image-binarized.bmp");
 
     // Apply Canny and find angle for rotate the image
-//    int angle = Hough_Transform(image_surface);
-//    image_surface = Rotate(image_surface, angle);
-//    SDL_SaveBMP(image_surface, "image/seg_image-canny.bmp");
-//    load_file("image/seg_image-binarized.bmp");
+    int angle = Hough_Transform(image_surface);
+    image_surface = Rotate(image_surface, angle);
+    SDL_SaveBMP(image_surface, "image/seg_image-canny.bmp");
+    load_file("image/seg_image-binarized.bmp");
 
     // Apply Segmentation
     Segmentation(image_surface);
