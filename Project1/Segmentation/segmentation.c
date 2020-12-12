@@ -299,20 +299,20 @@ char Snap(SDL_Surface *image_surface, size_t x, size_t y,
 
     image_to_matrix(letter_surface, matrix_image, 28, 28);
     c = arr_to_char(matrix_image, network);
-    printf("%c\n", c);
-    for (size_t j = 0; j < 28; j++)
-    {
-        for (size_t k = 0; k < 28; k++)
-        {
-            float f = matrix_image[j * 28 + k] / 255;
-            if (f > 0.1)
-            {
-                printf("\033[41m");
-            }
-            printf("%.1f \033[00m",f);
-        }
-        printf("\n");
-    }
+    //printf("%c\n", c);
+    // for (size_t j = 0; j < 28; j++)
+    // {
+    //     for (size_t k = 0; k < 28; k++)
+    //     {
+    //         float f = matrix_image[j * 28 + k] / 255;
+    //         if (f > 0.1)
+    //         {
+    //             printf("\033[41m");
+    //         }
+    //         printf("%.1f \033[00m",f);
+    //     }
+    //     printf("\n");
+    // }
 
     SDL_FreeSurface(letter_surface);
 
@@ -370,7 +370,7 @@ int find_space(SDL_Surface *image_surface, size_t width,
     return -1;
 }
 
-void drawallcolumn_and_cut(SDL_Surface *image_surface, SDL_Surface *copy_surface, size_t width,
+char *drawallcolumn_and_cut(SDL_Surface *image_surface, SDL_Surface *copy_surface, size_t width,
     size_t h1, size_t h2,Network *network)
 {
     int w1 = 0;
@@ -432,9 +432,9 @@ void drawallcolumn_and_cut(SDL_Surface *image_surface, SDL_Surface *copy_surface
             }
         }
     }
-
-    string[index] = '\0';
-    printf("\n\nstring :\n%s\n", string);
+    string[index]='\n';
+    string[index+1] = '\0';
+    return string;
 }
 
 // Border White
@@ -455,17 +455,36 @@ void WhiteCountouring(SDL_Surface *image_surface, size_t width, size_t height)
     }
 }
 
-
+// void concat(char **string0,char *string,int *size)
+// {
+//     int i=0;
+//     for(; *((*string0)+i)!='\0'; i++);
+  
+//     printf("i=%d\n",i);
+//     for(int j = 0;string[j]!='\0'; j++, i++)
+//     {
+//         printf("suspens\n");
+//         if(j == *size - 1){
+//             printf("danslaboucle\n");
+//             string_double_capacity(string0, size);
+//         }
+//         *((*string0)+i) = string[j];
+//     }
+//     *((*string0)+i) = '\0';
+// }
 // Main : Segmentation
 
-void Segmentation(SDL_Surface *image_surface,SDL_Surface *copy_surface)
+void Segmentation(SDL_Surface *image_surface,SDL_Surface *copy_surface,char string0[])
 {
     Network network;
 
     size_t width = image_surface->w;
     size_t height = image_surface->h;
 
+
     int h1 = 0, h2 = 0;
+
+    char *string;
 
     size_t nbCorrect;
     Dataset data_set;
@@ -483,7 +502,8 @@ void Segmentation(SDL_Surface *image_surface,SDL_Surface *copy_surface)
     {
         if (h2)
         {
-            drawallcolumn_and_cut(image_surface, copy_surface, width, h1, h2,&network);
+            string=drawallcolumn_and_cut(image_surface, copy_surface, width, h1, h2,&network);
+            strcat(string0,string);
             printf("%s\n", " retour");
             h2 = 0;
         }

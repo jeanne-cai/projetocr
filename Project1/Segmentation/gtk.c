@@ -14,7 +14,7 @@
 
 GtkWidget *window;
 GtkWidget *image;
-gchar *filename = "image/im_ocr.png";
+gchar *filename = "image/image_ocr.bmp";
 
 
 // ---- Tools dialog
@@ -129,6 +129,8 @@ void lunch_ocr()
     image_surface = IMG_Load(filename);
     copy_surface = IMG_Load(filename);
 
+    char stringFinale[100000];
+
     // Apply Grayscale
     GrayScale(image_surface);
     SDL_SaveBMP(image_surface, "image/seg_image-grayscale.bmp");
@@ -146,7 +148,9 @@ void lunch_ocr()
     load_file("image/seg_image-binarized.bmp");
 
     // Apply Segmentation
-    Segmentation(image_surface,copy_surface);
+    Segmentation(image_surface,copy_surface,stringFinale);
+    //printf("string finaaale = %s\n",string);
+
     SDL_SaveBMP(image_surface, "image/seg_image-contour.bmp");
     load_file("image/seg_image-contour.bmp");
 
