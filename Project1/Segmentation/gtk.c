@@ -149,7 +149,7 @@ void lunch_ocr()
 
     // Apply Segmentation
     Segmentation(image_surface,copy_surface,stringFinale);
-    //printf("string finaaale = %s\n",string);
+    printf("string finaaale = %s\n",stringFinale);
 
     SDL_SaveBMP(image_surface, "image/seg_image-contour.bmp");
     load_file("image/seg_image-contour.bmp");
@@ -158,7 +158,7 @@ void lunch_ocr()
                         GTK_DIALOG_DESTROY_WITH_PARENT,
                         GTK_MESSAGE_INFO,GTK_BUTTONS_CLOSE,
                         "TEXT : %s",
-    "blalblalba\n blabla bla\n sqdhbfhqbdsfjbsdjf sjwbnlijefnk jSBFlkjBJQSBLfnSBlhjbfslfkNJLXlcb ljSB jkFBEk");
+    stringFinale);
     gtk_window_set_title(GTK_WINDOW(text), "Text");
     gtk_dialog_run(GTK_DIALOG(text));
     gtk_widget_destroy(text);
