@@ -59,7 +59,7 @@ void load_file(gchar *file)
         size_t w = image_surface->w;
         size_t h = image_surface->h;
 
-/*        if (w > IMG_W || h > IMG_H)
+        if (w > IMG_W || h > IMG_H)
         {
             if (w > IMG_W)
                 w = IMG_W;
@@ -72,7 +72,7 @@ void load_file(gchar *file)
             gtk_image_set_from_file(GTK_IMAGE(image),
                 "image/image_resized.bmp");
         }
-        else*/
+        else
             gtk_image_set_from_file(GTK_IMAGE(image), filename);
 
         gtk_window_resize(GTK_WINDOW(window), w, h);
@@ -125,7 +125,7 @@ void choose_file()
 void lunch_ocr()
 {
     if (filename[0] == 0)
-        return; 
+        return;
 
     SDL_Surface *image_surface;
     SDL_Surface *copy_surface;
