@@ -133,6 +133,7 @@ void lunch_ocr()
     copy_surface = IMG_Load(filename);
 
     char stringFinale[100000];
+    stringFinale[0] = '\0';
 
     // Apply Grayscale
     GrayScale(image_surface);
