@@ -14,7 +14,7 @@
 
 GtkWidget *window;
 GtkWidget *image;
-gchar *filename = "image/image_ocr.bmp";
+gchar *filename = "";
 
 
 // ---- Tools dialog
@@ -59,7 +59,7 @@ void load_file(gchar *file)
         size_t w = image_surface->w;
         size_t h = image_surface->h;
 
-        if (w > IMG_W || h > IMG_H)
+/*        if (w > IMG_W || h > IMG_H)
         {
             if (w > IMG_W)
                 w = IMG_W;
@@ -72,11 +72,11 @@ void load_file(gchar *file)
             gtk_image_set_from_file(GTK_IMAGE(image),
                 "image/image_resized.bmp");
         }
-        else
+        else*/
             gtk_image_set_from_file(GTK_IMAGE(image), filename);
 
         gtk_window_resize(GTK_WINDOW(window), w, h);
-        gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+//        gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     }
 
     SDL_FreeSurface(image_surface);
@@ -124,6 +124,9 @@ void choose_file()
 
 void lunch_ocr()
 {
+    if (filename[0] == 0)
+        return; 
+
     SDL_Surface *image_surface;
     SDL_Surface *copy_surface;
     image_surface = IMG_Load(filename);
@@ -149,7 +152,7 @@ void lunch_ocr()
 
     // Apply Segmentation
     Segmentation(image_surface,copy_surface,stringFinale);
-    printf("string finaaale = %s\n",stringFinale);
+    printf("\nstring finaaale = %s\n",stringFinale);
 
     SDL_SaveBMP(image_surface, "image/seg_image-contour.bmp");
     load_file("image/seg_image-contour.bmp");
@@ -171,6 +174,9 @@ void lunch_ocr()
 
 void rotate90()
 {
+    if (filename[0] == 0)
+        return;
+
     SDL_Surface* image_surface;
     image_surface = IMG_Load(filename);
 
@@ -191,7 +197,7 @@ int gtk_init_window(int argc, char **argv)
 
     // Gets the widgets
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    image = gtk_image_new_from_file(filename);
+    image = gtk_image_new_from_file("image/logo_OCR.png");
 
     GtkWidget* main_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget* box_1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);

@@ -299,7 +299,7 @@ int Hough_Transform(SDL_Surface *image_surface)
     free(m);
     free(f);
 
-    printf("theta_max = %d\n", (int)theta_max);
+//    printf("theta_max = %d\n", (int)theta_max);
     return (int)theta_max;
 }
 

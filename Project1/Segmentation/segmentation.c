@@ -165,22 +165,22 @@ SDL_Surface* center(SDL_Surface *letter_surface)
   //ry = dest->h * 1.0 / src->h;
   if(w>h){
     double dnh =  h * 1.0 / w;
-    printf("%lu\n", w);
-    printf("%lu\n", h);
-    printf("%f\n", dnh);
+//    printf("%lu\n", w);
+//    printf("%lu\n", h);
+//    printf("%f\n", dnh);
     int nh=(int) (dnh*26);
     letter_surface = resize(letter_surface, 26, nh);
-    printf("%s\n", "oui");
+//    printf("%s\n", "oui");
     letter_surface = Wedge(letter_surface, 1,nh);
     return Hedge(letter_surface, (28 - nh)/2, 28);
   }
   else
   {
     double dnw = w * 1.0 / h;
-    printf("%f\n", dnw);
+//    printf("%f\n", dnw);
     int nw=(int) (dnw*26);
     letter_surface = resize(letter_surface,nw, 26);
-    printf("%s\n", "ui");
+//    printf("%s\n", "ui");
     letter_surface = Hedge(letter_surface, 1,nw);
     return Wedge(letter_surface, (28-nw)/2,28);
   }
@@ -504,7 +504,7 @@ void Segmentation(SDL_Surface *image_surface,SDL_Surface *copy_surface,char stri
         {
             string=drawallcolumn_and_cut(image_surface, copy_surface, width, h1, h2,&network);
             strcat(string0,string);
-            printf("%s\n", " retour");
+//            printf("%s\n", " retour");
             h2 = 0;
         }
 
