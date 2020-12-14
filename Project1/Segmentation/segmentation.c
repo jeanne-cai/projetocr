@@ -66,7 +66,6 @@ void drawcolumn(SDL_Surface *image_surface, size_t w_pos,
 void Stretch_Nearest(SDL_Surface *src, SDL_Surface *dest)
 {
     double rx, ry;
-    Uint8 r, g, b;
 
     rx = dest->w * 1.0 / src->w;
     ry = dest->h * 1.0 / src->h;
@@ -76,16 +75,7 @@ void Stretch_Nearest(SDL_Surface *src, SDL_Surface *dest)
         for (int j = 0; j < dest->h; j++)
         {
                 Uint32 pixel = get_pixel(src, (int)(i / rx), (int)(j / ry));
-                SDL_GetRGB(pixel, src->format, &r, &g, &b);
-                if(r==255 && g==0 && b==0)
-                {
-                  pixel = SDL_MapRGB(src->format, 255, 255, 255);
-                  put_pixel(dest, i, j, pixel);
-                }
-                else
-                {
-                  put_pixel(dest, i, j, pixel);
-                }
+                put_pixel(dest, i, j, pixel);
         }
     }
 }
@@ -469,7 +459,7 @@ void WhiteCountouring(SDL_Surface *image_surface, size_t width, size_t height)
 // {
 //     int i=0;
 //     for(; *((*string0)+i)!='\0'; i++);
-
+  
 //     printf("i=%d\n",i);
 //     for(int j = 0;string[j]!='\0'; j++, i++)
 //     {
