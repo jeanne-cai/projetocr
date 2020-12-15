@@ -134,7 +134,10 @@ void save_file(char *text)
             fclose(fichier);
         }
         g_file_set_contents(text_filename, text, strlen(text), NULL);
+        printf("[\e[92mOK\e[0m] File saving\n filename : %s\n", text_filename);
     }
+    else
+        printf("[\e[92mOK\e[0m] Don't need to save\n");
 
     gtk_widget_destroy(dialog);
 }
@@ -150,8 +153,12 @@ void show_text(char *stringFinale)
     gtk_dialog_add_button(GTK_DIALOG(text), "Save file", GTK_RESPONSE_YES);
 
     int result = gtk_dialog_run(GTK_DIALOG(text));
+
+    printf("\nSave file\n");
     if (result == GTK_RESPONSE_YES)
         save_file(stringFinale);
+    else
+        printf("[\e[92mOK\e[0m] Don't need to save\n");
 
     g_signal_connect_swapped (text, "response",
         G_CALLBACK (gtk_widget_destroy), text);
@@ -174,28 +181,49 @@ void lunch_ocr()
     char stringFinale[100000];
     stringFinale[0] = '\0';
 
+    printf("-------------------------------------------------\n");
+    printf("[\e[92mOK\e[0m] Init OCR\n");
+
+    printf("\nColor removal and Pre-processing\n");
+
     // Apply Grayscale
     GrayScale(image_surface);
     SDL_SaveBMP(image_surface, "image/seg_image-grayscale.bmp");
     load_file("image/seg_image-grayscale.bmp");
+    printf("[\e[92mOK\e[0m] Gray-scale\n");
+
+    // Apply Gauss
+//    Gauss(image_surface);
+//    SDL_SaveBMP(image_surface, "image/seg_image-gauss.bmp");
+//    load_file("image/seg_image-gauss.bmp");
+//    printf("[\e[92mOK\e[0m] Noise canceling\n");
+
+    // Apply contrast
+//    Contraste(image_surface);
+//    SDL_SaveBMP(image_surface, "image/seg_image-contrast.bmp");
+//    load_file("image/seg_image-contrast.bmp");
+//    printf("[\e[92mOK\e[0m] Contrast\n");
 
     // Apply Binarisation
     Otsu(image_surface);
     SDL_SaveBMP(image_surface, "image/seg_image-binarized.bmp");
     load_file("image/seg_image-binarized.bmp");
+    printf("[\e[92mOK\e[0m] Black and white\n");
 
     // Apply Canny and find angle for rotate the image
     int angle = Hough_Transform(image_surface);
     image_surface = Rotate(image_surface, angle);
     SDL_SaveBMP(image_surface, "image/seg_image-rotate.bmp");
     load_file("image/seg_image-rotate.bmp");
+    printf("[\e[92mOK\e[0m] Rotation (%d degree(s))\n", angle);
 
     // Apply Segmentation
-    Segmentation(image_surface,copy_surface,stringFinale);
+    Segmentation(image_surface, copy_surface, stringFinale);
     SDL_SaveBMP(image_surface, "image/seg_image-segmentation.bmp");
     load_file("image/seg_image-segmentation.bmp");
 
-    printf("\nstring finaaale = %s\n", stringFinale);
+    printf("\nText reconstruction\n");
+    printf("[\e[92mOK\e[0m]\n%s\n[\e[92mOK\e[0m]\n", stringFinale);
 
     // Show text : Create dialog
     show_text(stringFinale);
@@ -203,6 +231,7 @@ void lunch_ocr()
     // Final image
     SDL_SaveBMP(image_surface, "image/seg_image_ocr.bmp");
 
+    printf("-------------------------------------------------\n");
     SDL_FreeSurface(image_surface);
 }
 

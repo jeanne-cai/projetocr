@@ -74,6 +74,78 @@ void convolution(double m[], double k[], int w, int h, int k_w, int k_h, double 
     }
 }
 
+// ---- Gauss
+void Gauss(SDL_Surface *image_surface)
+{
+    size_t width = image_surface->w;
+    size_t height = image_surface->h;
+
+    double *m = init_matrix(width * height);
+    double *mGauss = init_matrix(width * height);
+
+    image_to_matrix(image_surface, m, width, height);
+
+    double G[] =
+    {
+        1, 2, 1,
+        2, 4, 2,
+        1, 2, 1
+    };
+
+    // Apply Gaussian filter : smooth, remove the noise
+    convolution(m, G, width, height, 3, 3, mGauss);
+
+    matrix_to_image(image_surface, width, height, mGauss);
+
+    free(mGauss);
+    free(m);
+}
+
+// ---- Contraste
+void Contraste(SDL_Surface *image_surface)
+{
+    size_t width = image_surface->w;
+    size_t height = image_surface->h;
+
+    double *m = init_matrix(width * height);
+    double *mCon = init_matrix(width * height);
+
+    image_to_matrix(image_surface, m, width, height);
+
+/*    double C[] =
+    {
+        -1, -1, -1,
+        -1, 3, -1,
+        -1, -1, -1
+    };
+*/
+
+    double C[] =
+    {
+        0, -1, 0,
+        -1, 5, -1,
+        0, -1, 0
+    };
+/*   double C[] =
+   {
+       1, 4, 6, 4, 1,
+       4, 16, 24, 16, 4,
+       6, 24, -476, 24, 6,
+       4, 16, 24, 16, 4,
+       1, 4, 6, 4, 1
+   };
+
+    for (size_t i = 0; i < width * height; i++)
+        mCon[i] = mCon[i] * (-1.0 / 256.0);
+
+    convolution(m, C, width, height, 5, 5, mCon);
+*/
+    convolution(m, C, width, height, 3, 3, mCon);
+    matrix_to_image(image_surface, width, height, mCon);
+
+    free(mCon);
+    free(m);
+}
 
 // ---- Canny edge detector
 

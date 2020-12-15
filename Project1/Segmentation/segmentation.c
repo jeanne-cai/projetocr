@@ -500,12 +500,19 @@ void Segmentation(SDL_Surface *image_surface,SDL_Surface *copy_surface,char stri
     Dataset data_set;
     initialiseDataSet(&data_set, "dataSetfile.csv");
 
+
+    printf("\nNeural Network\n");
     load_network(&network, "neuralnet82.2.net");
+    printf("[\e[92mOK\e[0m] Load network\n");
+
     nbCorrect = evaluateNetwork(&network, &data_set);
+    printf("[\e[92mOK\e[0m] Evaluate network :");
+
     printf("\n %ld éléments reconnus correct sur %ld, %.3f\n",
             nbCorrect,data_set.size, (float)nbCorrect/data_set.size);
     // exit(1);
 
+    printf("\nSegmentation\n");
     WhiteCountouring(image_surface, width, height);
 
     for (size_t j = 0; j < height; j++)
@@ -532,4 +539,6 @@ void Segmentation(SDL_Surface *image_surface,SDL_Surface *copy_surface,char stri
             }
         }
     }
+    printf("[\e[92mOK\e[0m] Text block detection\n");
+    printf("[\e[92mOK\e[0m] Character detection\n");
 }
